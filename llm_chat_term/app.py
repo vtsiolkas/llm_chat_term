@@ -42,6 +42,7 @@ def main() -> NoReturn:
     # Initialize UI and LLM client
     ui = ChatUI()
     llm = LLMClient(ui, selected_chat)
+    should_think = False
 
     # Main application loop
     while True:
@@ -54,23 +55,35 @@ def main() -> NoReturn:
         if user_input in ("/exit", "exit"):
             print("Exiting...")
             break
-        if user_input == "/help":
+        elif user_input == "/help":
             ui.display_help()
             continue
-        if user_input == "/info":
+        elif user_input == "/info":
             ui.display_info(selected_chat)
             continue
-        if user_input in ["/edit", "/e"]:
+        elif user_input in ["/edit", "/e"]:
             if selected_chat:
                 utils.open_in_editor(selected_chat)
                 llm.parse_messages()
+            else:
+                print("Cannot edit messages in anonymous chat.")
             continue
+        elif user_input == "/select":
+            selected_chat = select_chat()
+            llm = LLMClient(ui, selected_chat)
+            continue
+        elif user_input == "/redraw":
+            llm.parse_messages()
+            continue
+        elif user_input.startswith("/think"):
+            should_think = True
 
         # Add message to LLM client
         llm.add_user_message(user_input)
 
         # Get and display streaming response
-        llm.get_response(ui.stream_token)
+        llm.get_response(ui.stream_token, should_think)
+        should_think = False
 
         # End streaming
         ui.end_streaming()

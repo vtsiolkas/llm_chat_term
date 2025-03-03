@@ -55,6 +55,8 @@ class ChatUI:
 
         # Track whether we're currently streaming a response
         self.streaming = False
+        # Track whether we're in a thinking block
+        self.thinking = False
         self.current_response = ""
         self.live = Live()
 
@@ -80,13 +82,8 @@ class ChatUI:
 
         return text
 
-    def display_welcome_message(self, chat_id: str | None):
+    def display_welcome_message(self):
         """Display a welcome message when a chat starts."""
-        if chat_id:
-            chat_text = f"Selected chat: {chat_id}"
-        else:
-            chat_text = "Anonymous chat"
-        self.console.print(chat_text, style=f"bold {config.colors.system}")
         self.console.print(
             "Type your messages and press Alt(Esc)+Enter to send. Use Enter for newlines.",
             style=config.colors.system,
@@ -112,6 +109,18 @@ class ChatUI:
         )
         self.console.print(
             "           Edit it and save and it will be reloaded in the message history.",
+            style=config.colors.system,
+        )
+        self.console.print(
+            "/select: Display the menu to select a different chat",
+            style=config.colors.system,
+        )
+        self.console.print(
+            "/redraw: Redraw the whole conversation",
+            style=config.colors.system,
+        )
+        self.console.print(
+            "/think {prompt}: Enable thinking mode only for this question (Claude only)",
             style=config.colors.system,
         )
         self.console.print(
@@ -147,10 +156,12 @@ class ChatUI:
     def render_conversation(self, messages: list[BaseMessage], chat_id: str | None):
         self.console.clear()
         # Display welcome message
-        self.display_welcome_message(chat_id)
+        self.display_welcome_message()
+        chat_name = chat_id if chat_id else "Anonymous chat"
 
         content = Text(
-            " CONVERSATION START ", style=f"bold black on {config.colors.system}"
+            f" CONVERSATION START [{chat_name}]",
+            style=f"bold black on {config.colors.system}",
         )
         rule = Rule(content, style=f"on {config.colors.system}", characters=" ")
 
@@ -175,12 +186,19 @@ class ChatUI:
         content = Group(self._get_ai_title(), text)
         self.live.update(content)
 
-    def stream_token(self, token: str):
+    def stream_token(self, token: str, chunk_type: str):
         """Display a streaming token from the assistant."""
         if not self.streaming:
             self.console.clear()
             self.live.start()
             self.streaming = True
+        if chunk_type == "thinking" and not self.thinking:
+            self.thinking = True
+            self.current_response += "\\<think>\n"
+        if chunk_type == "text" and self.thinking:
+            # Here starts the actual response, clear the thinking part
+            self.thinking = False
+            self.current_response = ""
 
         self.current_response += token
         self._update_live()

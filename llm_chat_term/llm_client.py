@@ -4,7 +4,13 @@ from typing import Any, Callable, cast, override
 
 from langchain.callbacks.base import BaseCallbackHandler
 from langchain_anthropic import ChatAnthropic
-from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, SystemMessage
+from langchain_core.messages import (
+    AIMessage,
+    BaseMessage,
+    BaseMessageChunk,
+    HumanMessage,
+    SystemMessage,
+)
 from langchain_openai import ChatOpenAI
 
 from llm_chat_term import db
@@ -25,6 +31,32 @@ class StreamingCallbackHandler(BaseCallbackHandler):
         self.stream_callback(token)
 
 
+def get_chunk_text_and_type(chunk: BaseMessageChunk) -> tuple[str, str]:
+    """Get the text content and type of the message."""
+    if isinstance(chunk.content, str):  # pyright: ignore[reportUnknownMemberType]
+        return chunk.content, "text"
+
+    # must be a list, extract the type from the first block
+    chunk.content = cast(list[dict[str, str] | str], chunk.content)
+    first_block = chunk.content[0]
+    first_block = cast(str | dict[str, str], first_block)
+    if isinstance(first_block, str):
+        chunk_type = "text"
+    else:
+        chunk_type: str = first_block.get("type", "text")
+    blocks = [
+        block
+        for block in chunk.content
+        if isinstance(block, str)
+        or block.get("type") == "text"
+        and isinstance(block.get("text"), str)
+    ]
+    return "".join(
+        block if isinstance(block, str) else block.get(chunk_type, "text")
+        for block in chunk.content
+    ), chunk_type
+
+
 class LLMClient:
     """Client for interacting with the LLM."""
 
@@ -35,7 +67,17 @@ class LLMClient:
                 api_key=config.llm.anthropic_key,
                 model=config.llm.model,  # pyright: ignore[reportCallIssue]
                 temperature=config.llm.temperature,
-                max_tokens=16389,  # pyright: ignore[reportCallIssue]
+                max_tokens=16384,  # pyright: ignore[reportCallIssue]
+                stream_usage=False,
+                streaming=True,
+            )
+            self.thinking_model = ChatAnthropic(  # pyright: ignore[reportCallIssue]
+                api_key=config.llm.anthropic_key,
+                model=config.llm.model,  # pyright: ignore[reportCallIssue]
+                temperature=1,  # Needs to be 1 for thinking
+                max_tokens=16384,  # pyright: ignore[reportCallIssue]
+                thinking={"type": "enabled", "budget_tokens": 2048},
+                stream_usage=False,
                 streaming=True,
             )
         elif config.llm.provider == "openai":
@@ -43,9 +85,10 @@ class LLMClient:
                 api_key=config.llm.openai_api_key,
                 model=config.llm.model,
                 temperature=config.llm.temperature,
-                max_tokens=16389,  # pyright: ignore[reportCallIssue]
+                max_tokens=16384,  # pyright: ignore[reportCallIssue]
                 streaming=True,
             )
+            self.thinking_model = self.model
 
         self.ui = ui
         self.chat_id: str | None = chat_id
@@ -67,18 +110,27 @@ class LLMClient:
         if self.chat_id is not None:
             db.save_chat_history(self.chat_id, self.get_conversation_history())
 
-    def get_response(self, stream_callback: Callable[[str], None]) -> None:
+    def get_response(
+        self, stream_callback: Callable[[str, str], None], should_think: bool = False
+    ) -> None:
         """Get a response from the LLM and stream it through the callback."""
-        callback_handler = StreamingCallbackHandler(stream_callback)
+        # callback_handler = StreamingCallbackHandler(stream_callback)
+        model = self.thinking_model if should_think else self.model
 
-        response = self.model.invoke(
-            self.messages,
-            config={
-                "callbacks": [callback_handler],
-            },
-        )
-        response.content = cast(str, response.content)
-        self.add_assistant_message(response.content)
+        # response = model.invoke(
+        #     self.messages,
+        #     config={
+        #         "callbacks": [callback_handler],
+        #     },
+        # )
+        response = ""
+        for chunk in model.stream(self.messages):
+            text, chunk_type = get_chunk_text_and_type(chunk)
+            stream_callback(text, chunk_type)
+            response += chunk.text()
+        # print(response)
+        # response.content = cast(str, response.content)
+        self.add_assistant_message(response)
 
     def parse_messages(self):
         self.chat_id = cast(str, self.chat_id)
