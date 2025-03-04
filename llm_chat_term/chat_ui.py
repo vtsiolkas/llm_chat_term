@@ -98,13 +98,13 @@ class ChatUI:
         self.console.print("Available commands", style=f"bold {config.colors.system}")
         self.console.print()
         self.console.print(
-            "/help: Displays this help message.", style=config.colors.system
+            ":help    Displays this help message.", style=config.colors.system
         )
         self.console.print(
-            "/info: Displays info about this chat.", style=config.colors.system
+            ":info    Displays info about this chat.", style=config.colors.system
         )
         self.console.print(
-            "/edit, /e: Opens the conversation history in $EDITOR (vim by default).",
+            ":edit, :e    Opens the conversation history in $EDITOR (vim by default).",
             style=config.colors.system,
         )
         self.console.print(
@@ -112,19 +112,27 @@ class ChatUI:
             style=config.colors.system,
         )
         self.console.print(
-            "/select: Display the menu to select a different chat",
+            ":chat    Display the menu to select a different chat",
             style=config.colors.system,
         )
         self.console.print(
-            "/redraw: Redraw the whole conversation",
+            ":model Display the menu to select a different chat",
             style=config.colors.system,
         )
         self.console.print(
-            "/think {prompt}: Enable thinking mode only for this question (Claude only)",
+            ":redraw    Redraw the whole conversation",
             style=config.colors.system,
         )
         self.console.print(
-            "/exit: Exits the application. The conversation is saved if not anonymous chat.",
+            ":think {prompt}    Enable thinking mode only for this question (Claude only)",
+            style=config.colors.system,
+        )
+        self.console.print(
+            ":read {path}    Embed a text file in the prompt (replaces the line with :read)",
+            style=config.colors.system,
+        )
+        self.console.print(
+            ":exit    Exits the application. The conversation is saved if not anonymous chat.",
             style=config.colors.system,
         )
         self.console.print()

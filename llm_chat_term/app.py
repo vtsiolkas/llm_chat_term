@@ -9,24 +9,19 @@ from llm_chat_term.chat_selector import select_chat
 from llm_chat_term.chat_ui import ChatUI
 from llm_chat_term.llm_client import LLMClient
 from llm_chat_term.config import config
+from llm_chat_term.model_selector import select_model
+from llm_chat_term.read_file import process_read_commands
 
 
 def main() -> NoReturn:
     """Run the terminal LLM chatbot application."""
     try:
-        if config.llm.provider == "anthropic":
-            if not config.llm.anthropic_key:
-                raise ValueError(
-                    "Anthropic API key is not set. Please set it in your config.yaml file."
-                )
-        elif config.llm.provider == "openai":
-            if not config.llm.openai_api_key:
-                raise ValueError(
-                    "OpenAI API key is not set. Please set it in your config.yaml file."
-                )
-        else:
-            raise ValueError(f"Invalid provider: {config.llm.provider}")
-    except ValueError as e:
+        model = config.llm.models[0]
+        if not model.api_key.get_secret_value():
+            raise ValueError(
+                "API key for the default model is not set. Please set it in your config.yaml file."
+            )
+    except Exception as e:
         print(f"Error: {e}")
         sys.exit(1)
 
@@ -52,31 +47,41 @@ def main() -> NoReturn:
         if not user_input:
             continue
         # Check for commands
-        if user_input in ("/exit", "exit"):
+        if user_input in (":exit", "exit"):
             print("Exiting...")
             break
-        elif user_input == "/help":
+        elif user_input == ":help":
             ui.display_help()
             continue
-        elif user_input == "/info":
+        elif user_input == ":info":
             ui.display_info(selected_chat)
             continue
-        elif user_input in ["/edit", "/e"]:
+        elif user_input in [":edit", ":e"]:
             if selected_chat:
                 utils.open_in_editor(selected_chat)
                 llm.parse_messages()
             else:
                 print("Cannot edit messages in anonymous chat.")
             continue
-        elif user_input == "/select":
+        elif user_input == ":model":
+            selected_model = select_model()
+            llm.configure_model(selected_model)
+            continue
+        elif user_input == ":chat":
             selected_chat = select_chat()
             llm = LLMClient(ui, selected_chat)
             continue
-        elif user_input == "/redraw":
+        elif user_input == ":redraw":
             llm.parse_messages()
             continue
-        elif user_input.startswith("/think"):
+        elif user_input.startswith(":think"):
             should_think = True
+        else:
+            try:
+                user_input = process_read_commands(user_input)
+            except Exception as e:
+                print(e)
+                continue
 
         # Add message to LLM client
         llm.add_user_message(user_input)

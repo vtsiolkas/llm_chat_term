@@ -15,7 +15,7 @@ from langchain_openai import ChatOpenAI
 
 from llm_chat_term import db
 from llm_chat_term.chat_ui import ChatUI
-from llm_chat_term.config import config
+from llm_chat_term.config import ModelConfig, config
 
 
 class StreamingCallbackHandler(BaseCallbackHandler):
@@ -60,35 +60,12 @@ def get_chunk_text_and_type(chunk: BaseMessageChunk) -> tuple[str, str]:
 class LLMClient:
     """Client for interacting with the LLM."""
 
+    model = None
+    thinking_model = None
+
     def __init__(self, ui: ChatUI, chat_id: str | None):
         """Initialize the LLM client with the configured model."""
-        if config.llm.provider == "anthropic":
-            self.model = ChatAnthropic(  # pyright: ignore[reportCallIssue]
-                api_key=config.llm.anthropic_key,
-                model=config.llm.model,  # pyright: ignore[reportCallIssue]
-                temperature=config.llm.temperature,
-                max_tokens=16384,  # pyright: ignore[reportCallIssue]
-                stream_usage=False,
-                streaming=True,
-            )
-            self.thinking_model = ChatAnthropic(  # pyright: ignore[reportCallIssue]
-                api_key=config.llm.anthropic_key,
-                model=config.llm.model,  # pyright: ignore[reportCallIssue]
-                temperature=1,  # Needs to be 1 for thinking
-                max_tokens=16384,  # pyright: ignore[reportCallIssue]
-                thinking={"type": "enabled", "budget_tokens": 2048},
-                stream_usage=False,
-                streaming=True,
-            )
-        elif config.llm.provider == "openai":
-            self.model = ChatOpenAI(
-                api_key=config.llm.openai_api_key,
-                model=config.llm.model,
-                temperature=config.llm.temperature,
-                max_tokens=16384,  # pyright: ignore[reportCallIssue]
-                streaming=True,
-            )
-            self.thinking_model = self.model
+        self.configure_model(config.llm.models[0])
 
         self.ui = ui
         self.chat_id: str | None = chat_id
@@ -97,6 +74,35 @@ class LLMClient:
         else:
             self.messages: list[BaseMessage] = [SystemMessage(config.llm.system_prompt)]
             self.ui.render_conversation(self.messages, self.chat_id)
+
+    def configure_model(self, model_config: ModelConfig) -> None:
+        if model_config.provider == "anthropic":
+            self.model = ChatAnthropic(  # pyright: ignore[reportCallIssue]
+                api_key=model_config.api_key,
+                model=model_config.model,  # pyright: ignore[reportCallIssue]
+                temperature=model_config.temperature,
+                max_tokens=16384,  # pyright: ignore[reportCallIssue]
+                stream_usage=False,
+                streaming=True,
+            )
+            self.thinking_model = ChatAnthropic(  # pyright: ignore[reportCallIssue]
+                api_key=model_config.api_key,
+                model=model_config.model,  # pyright: ignore[reportCallIssue]
+                temperature=1,  # Needs to be 1 for thinking
+                max_tokens=16384,  # pyright: ignore[reportCallIssue]
+                thinking={"type": "enabled", "budget_tokens": 2048},
+                stream_usage=False,
+                streaming=True,
+            )
+        elif model_config.provider == "openai":
+            self.model = ChatOpenAI(
+                api_key=model_config.api_key,
+                model=model_config.model,
+                temperature=model_config.temperature,
+                max_tokens=16384,  # pyright: ignore[reportCallIssue]
+                streaming=True,
+            )
+            self.thinking_model = self.model
 
     def add_user_message(self, content: str) -> None:
         """Add a user message to the conversation history."""
@@ -114,15 +120,8 @@ class LLMClient:
         self, stream_callback: Callable[[str, str], None], should_think: bool = False
     ) -> None:
         """Get a response from the LLM and stream it through the callback."""
-        # callback_handler = StreamingCallbackHandler(stream_callback)
         model = self.thinking_model if should_think else self.model
 
-        # response = model.invoke(
-        #     self.messages,
-        #     config={
-        #         "callbacks": [callback_handler],
-        #     },
-        # )
         response = ""
         for chunk in model.stream(self.messages):
             text, chunk_type = get_chunk_text_and_type(chunk)
