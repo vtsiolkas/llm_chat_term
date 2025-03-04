@@ -86,6 +86,7 @@ def main() -> NoReturn:
         # Add message to LLM client
         llm.add_user_message(user_input)
 
+        # TODO: Handle errors from LLM API gracefully
         # Get and display streaming response
         llm.get_response(ui.stream_token, should_think)
         should_think = False
