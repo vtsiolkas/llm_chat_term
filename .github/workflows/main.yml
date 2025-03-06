@@ -41,7 +41,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: pypi
-      url: https://pypi.org/p/term_chat
+      url: https://pypi.org/p/llm_chat_term
     permissions:
       id-token: write
     steps:
