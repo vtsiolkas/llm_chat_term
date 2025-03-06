@@ -13,14 +13,9 @@ def get_default_models():
             provider="anthropic",
             model="claude-3-7-sonnet-20250219",
             api_key=SecretStr(""),
-            temperature=0.4,
         ),
-        ModelConfig(
-            provider="openai", model="gpt-4o", api_key=SecretStr(""), temperature=0.4
-        ),
-        ModelConfig(
-            provider="openai", model="o3-mini", api_key=SecretStr(""), temperature=0.4
-        ),
+        ModelConfig(provider="openai", model="gpt-4o", api_key=SecretStr("")),
+        ModelConfig(provider="openai", model="o3-mini", api_key=SecretStr("")),
     ]
 
 
@@ -28,13 +23,13 @@ class ModelConfig(BaseModel):
     provider: str
     model: str
     api_key: SecretStr = Field(default=SecretStr(""))
-    temperature: float = 0.4
+    temperature: float | None = None
 
 
 class LLMConfig(BaseModel):
     models: list[ModelConfig] = Field(default_factory=get_default_models)
     system_prompt: str = (
-        "You are a helpful assistant responding to a user's questions in a terminal environment. "
+        "You are a helpful assistant responding to a user's questions in a PC terminal application. "
         "The user is an experienced software engineer, your answers should be concise and not "
         "repetitive. Skip conclusions and summarizations of your answers."
         "If the user asks for a change in code, don't return the whole code, just the changed segment(s)."

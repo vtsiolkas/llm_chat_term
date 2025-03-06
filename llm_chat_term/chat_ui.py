@@ -194,6 +194,9 @@ class ChatUI:
         content = Group(self._get_ai_title(), text)
         self.live.update(content)
 
+    def display_loader(self):
+        self.console.print("[yellow]Contemplating...[/yellow]")
+
     def stream_token(self, token: str, chunk_type: str):
         """Display a streaming token from the assistant."""
         if not self.streaming:

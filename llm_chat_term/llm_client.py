@@ -4,6 +4,7 @@ from typing import Any, Callable, cast, override
 
 from langchain.callbacks.base import BaseCallbackHandler
 from langchain_anthropic import ChatAnthropic
+from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import (
     AIMessage,
     BaseMessage,
@@ -76,11 +77,15 @@ class LLMClient:
             self.ui.render_conversation(self.messages, self.chat_id)
 
     def configure_model(self, model_config: ModelConfig) -> None:
+        if model_config.provider == "openai" and model_config.model.startswith("o"):
+            temperature = 1.0
+        else:
+            temperature = model_config.temperature or 0.4
         if model_config.provider == "anthropic":
             self.model = ChatAnthropic(  # pyright: ignore[reportCallIssue]
                 api_key=model_config.api_key,
                 model=model_config.model,  # pyright: ignore[reportCallIssue]
-                temperature=model_config.temperature,
+                temperature=temperature,
                 max_tokens=16384,  # pyright: ignore[reportCallIssue]
                 stream_usage=False,
                 streaming=True,
@@ -88,7 +93,7 @@ class LLMClient:
             self.thinking_model = ChatAnthropic(  # pyright: ignore[reportCallIssue]
                 api_key=model_config.api_key,
                 model=model_config.model,  # pyright: ignore[reportCallIssue]
-                temperature=1,  # Needs to be 1 for thinking
+                temperature=1.0,  # Needs to be 1 for thinking
                 max_tokens=16384,  # pyright: ignore[reportCallIssue]
                 thinking={"type": "enabled", "budget_tokens": 2048},
                 stream_usage=False,
@@ -98,7 +103,7 @@ class LLMClient:
             self.model = ChatOpenAI(
                 api_key=model_config.api_key,
                 model=model_config.model,
-                temperature=model_config.temperature,
+                temperature=temperature,
                 max_tokens=16384,  # pyright: ignore[reportCallIssue]
                 streaming=True,
             )
@@ -121,14 +126,14 @@ class LLMClient:
     ) -> None:
         """Get a response from the LLM and stream it through the callback."""
         model = self.thinking_model if should_think else self.model
+        model = cast(BaseChatModel, model)
 
         response = ""
+        self.ui.display_loader()
         for chunk in model.stream(self.messages):
             text, chunk_type = get_chunk_text_and_type(chunk)
             stream_callback(text, chunk_type)
             response += chunk.text()
-        # print(response)
-        # response.content = cast(str, response.content)
         self.add_assistant_message(response)
 
     def parse_messages(self):
