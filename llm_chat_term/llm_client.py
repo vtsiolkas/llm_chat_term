@@ -43,12 +43,12 @@ class LLMClient:
     model = None
     thinking_model = None
 
-    def __init__(self, ui: ChatUI, chat_id: str | None):
+    def __init__(self, ui: ChatUI, chat_id: str):
         """Initialize the LLM client with the configured model."""
         self.configure_model(config.llm.models[0])
 
         self.ui = ui
-        self.chat_id: str | None = chat_id
+        self.chat_id = chat_id
         if chat_id:
             self.parse_messages()
         else:
@@ -92,13 +92,13 @@ class LLMClient:
     def add_user_message(self, content: str) -> None:
         """Add a user message to the conversation history."""
         self.messages.append(HumanMessage(content))
-        if self.chat_id is not None:
+        if self.chat_id:
             db.save_chat_history(self.chat_id, self.get_conversation_history())
 
     def add_assistant_message(self, content: str) -> None:
         """Add an assistant message to the conversation history."""
         self.messages.append(AIMessage(content))
-        if self.chat_id is not None:
+        if self.chat_id:
             db.save_chat_history(self.chat_id, self.get_conversation_history())
 
     def get_response(
@@ -117,7 +117,6 @@ class LLMClient:
         self.add_assistant_message(response)
 
     def parse_messages(self):
-        self.chat_id = cast(str, self.chat_id)
         messages_dict = db.load_chat_history(self.chat_id)
         self.messages = []
         for message in messages_dict:

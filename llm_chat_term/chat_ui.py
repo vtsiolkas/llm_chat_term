@@ -66,7 +66,7 @@ class ChatUI:
         )
         return Rule(content, style=f"on {config.colors.assistant}", characters=" ")
 
-    def _get_user_title(self, model_name: str = "", chat_id: str | None = ""):
+    def _get_user_title(self, model_name: str = "", chat_id: str = ""):
         if not model_name:
             model_name = ""
             chat_name = ""
@@ -153,7 +153,7 @@ class ChatUI:
         )
         self.console.print()
 
-    def display_info(self, chat_id: str | None):
+    def display_info(self, chat_id: str):
         if chat_id:
             self.console.print(
                 f"Selected chat: {chat_id}", style=f"bold {config.colors.system}"
@@ -161,7 +161,7 @@ class ChatUI:
         else:
             self.console.print("Anonymous chat", style=f"bold {config.colors.system}")
 
-    def get_user_input(self, model_name: str, chat_id: str | None) -> str:
+    def get_user_input(self, model_name: str, chat_id: str) -> str:
         """Get multiline input from the user."""
         try:
             self.console.print(self._get_user_title(model_name, chat_id))
@@ -177,7 +177,7 @@ class ChatUI:
             # Handle Ctrl+D
             return "exit"
 
-    def render_conversation(self, messages: list[BaseMessage], chat_id: str | None):
+    def render_conversation(self, messages: list[BaseMessage], chat_id: str):
         self.console.clear()
         # Display welcome message
         self.display_welcome_message()

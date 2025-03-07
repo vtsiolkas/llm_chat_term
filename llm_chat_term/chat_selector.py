@@ -21,7 +21,7 @@ def handle_edit(event: KeyPressEvent, menu: Menu):
     event.app.invalidate()
 
 
-def select_chat() -> str | None:
+def select_chat() -> str:
     all_chats = db.list_all_chats()
     if len(all_chats) == 0:
         return create_new_chat()
@@ -39,30 +39,37 @@ def select_chat() -> str | None:
 
     result = menu.run()
 
-    if result is None:
-        return None
     if result == 0:
         return create_new_chat()
 
     return chats[result]
 
 
-def create_new_chat() -> str | None:
+def create_new_chat(allow_blank: bool = True) -> str:
     """Prompt the user to create a new chat."""
     from prompt_toolkit import prompt
 
     console = Console()
-    console.print("[green]Create a New Chat[/green]")
+    if allow_blank:
+        console.print("[green]Create a New Chat...[/green]")
+    else:
+        console.print("[green]Pick a name to save the chat before editing...[/green]")
+    prompt_text = "Enter a name"
+    prompt_text += "(blank for anonymous chat): " if allow_blank else ": "
 
     try:
-        chat_id = prompt("Enter a name for your new chat(blank for anonymous chat): ")
+        chat_id = prompt(prompt_text)
     except KeyboardInterrupt:
-        console.print("\nExiting...")
-        sys.exit(0)
+        if allow_blank:
+            console.print("\nExiting...")
+            sys.exit(0)
+        else:
+            chat_id = ""
+            console.print("Cannot edit conversation with a chat name...")
 
-    if not chat_id.strip():
-        return None
+    chat_id = chat_id.strip()
 
-    console.print(f"[blue]Created new chat: {chat_id}[/blue]")
+    if chat_id:
+        console.print(f"[blue]Created new chat: {chat_id}[/blue]")
 
     return chat_id

@@ -1,5 +1,5 @@
-import os
 import mimetypes
+import os
 
 
 def process_read_commands(user_input: str) -> str:

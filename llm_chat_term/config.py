@@ -1,9 +1,10 @@
 """Configuration module for the terminal LLM chatbot."""
 
 import sys
-import yaml
 
+import yaml
 from pydantic import BaseModel, Field, SecretStr
+
 from llm_chat_term.db import get_config_file
 
 

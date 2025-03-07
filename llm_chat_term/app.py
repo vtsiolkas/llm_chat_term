@@ -4,11 +4,11 @@ import signal
 import sys
 from typing import NoReturn
 
-from llm_chat_term import utils
-from llm_chat_term.chat_selector import select_chat
+from llm_chat_term import db, utils
+from llm_chat_term.chat_selector import create_new_chat, select_chat
 from llm_chat_term.chat_ui import ChatUI
-from llm_chat_term.llm_client import LLMClient
 from llm_chat_term.config import config
+from llm_chat_term.llm_client import LLMClient
 from llm_chat_term.model_selector import select_model
 from llm_chat_term.read_file import process_read_commands
 
@@ -61,7 +61,13 @@ def main() -> NoReturn:
                 utils.open_in_editor(selected_chat)
                 llm.parse_messages()
             else:
-                print("Cannot edit messages in anonymous chat.")
+                selected_chat = create_new_chat(allow_blank=False)
+                if selected_chat:
+                    messages_dict = llm.get_conversation_history()
+                    db.save_chat_history(selected_chat, messages_dict)
+                    utils.open_in_editor(selected_chat)
+                    llm.chat_id = selected_chat
+                    llm.parse_messages()
             continue
         elif user_input == ":model":
             selected_model = select_model()

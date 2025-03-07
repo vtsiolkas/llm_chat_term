@@ -1,5 +1,6 @@
 import sys
 from typing import Callable
+
 from prompt_toolkit import Application
 from prompt_toolkit.key_binding import KeyBindings, KeyPressEvent
 from prompt_toolkit.layout import FormattedTextControl, HSplit, Layout, Window
