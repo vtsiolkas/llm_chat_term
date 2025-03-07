@@ -14,6 +14,7 @@ from rich.syntax import Syntax
 from rich.text import Text
 
 from llm_chat_term.config import config
+from llm_chat_term.help import print_help
 
 
 class CodeBlockNoPadding(CodeBlock):
@@ -111,47 +112,7 @@ class ChatUI:
         self.console.print()
 
     def display_help(self):
-        self.console.print("Available commands", style=f"bold {config.colors.system}")
-        self.console.print()
-        self.console.print(
-            ":help    Displays this help message.", style=config.colors.system
-        )
-        self.console.print(
-            ":info    Displays info about this chat.", style=config.colors.system
-        )
-        self.console.print(
-            ":edit, :e    Opens the conversation history in $EDITOR (vim by default).",
-            style=config.colors.system,
-        )
-        self.console.print(
-            "           Edit it and save and it will be reloaded in the message history.",
-            style=config.colors.system,
-        )
-        self.console.print(
-            ":chat    Display the menu to select a different chat",
-            style=config.colors.system,
-        )
-        self.console.print(
-            ":model Display the menu to select a different chat",
-            style=config.colors.system,
-        )
-        self.console.print(
-            ":redraw    Redraw the whole conversation",
-            style=config.colors.system,
-        )
-        self.console.print(
-            ":think {prompt}    Enable thinking mode only for this question (Claude only)",
-            style=config.colors.system,
-        )
-        self.console.print(
-            ":read {path}    Embed a text file in the prompt (replaces the line with :read)",
-            style=config.colors.system,
-        )
-        self.console.print(
-            ":exit    Exits the application. The conversation is saved if not anonymous chat.",
-            style=config.colors.system,
-        )
-        self.console.print()
+        print_help(self.console)
 
     def display_info(self, chat_id: str):
         if chat_id:
