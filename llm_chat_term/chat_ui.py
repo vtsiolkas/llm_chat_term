@@ -66,11 +66,27 @@ class ChatUI:
         )
         return Rule(content, style=f"on {config.colors.assistant}", characters=" ")
 
-    def _get_user_title(self):
-        content = Text(
-            f" {config.ui.user} ", style=f"bold black on {config.colors.user}"
+    def _get_user_title(self, model_name: str = "", chat_id: str | None = ""):
+        if not model_name:
+            model_name = ""
+            chat_name = ""
+        else:
+            model_name = f"[{model_name}] "
+            chat_name = f" [{chat_id}]" if chat_id else " [Anonymous chat]"
+
+        width = self.console.width
+        left_width = width // 3
+        center_width = width // 3
+        right_width = width - left_width - center_width
+
+        formatted = (
+            f"{chat_name:<{left_width}}"
+            f"{config.ui.user:^{center_width}}"
+            f"{model_name:>{right_width}}"
         )
-        return Rule(content, style=f"on {config.colors.user}", characters=" ")
+
+        content = Text(formatted, style=f"bold black on {config.colors.user}")
+        return content
 
     def _get_markdown(self, content: str):
         try:
@@ -145,10 +161,10 @@ class ChatUI:
         else:
             self.console.print("Anonymous chat", style=f"bold {config.colors.system}")
 
-    def get_user_input(self) -> str:
+    def get_user_input(self, model_name: str, chat_id: str | None) -> str:
         """Get multiline input from the user."""
         try:
-            self.console.print(self._get_user_title())
+            self.console.print(self._get_user_title(model_name, chat_id))
             user_input = self.session.prompt(
                 config.ui.prompt_symbol,
                 style=self.style,

@@ -8,7 +8,7 @@ def process_read_commands(user_input: str) -> str:
     for line in user_input.splitlines():
         if line.strip().startswith(":read "):
             # Extract the file path
-            file_path = line.strip()[6:].strip()
+            file_path = os.path.expanduser(line.strip()[6:].strip())
 
             # Check if file exists
             if not os.path.exists(file_path):

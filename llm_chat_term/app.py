@@ -42,7 +42,7 @@ def main() -> NoReturn:
     # Main application loop
     while True:
         # Get user input
-        user_input = ui.get_user_input()
+        user_input = ui.get_user_input(llm.model_config.model, llm.chat_id)
         # Skip empty inputs
         if not user_input:
             continue

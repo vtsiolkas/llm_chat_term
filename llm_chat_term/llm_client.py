@@ -1,8 +1,7 @@
 """LLM client for the terminal chatbot using LangChain."""
 
-from typing import Any, Callable, cast, override
+from typing import Callable, cast
 
-from langchain.callbacks.base import BaseCallbackHandler
 from langchain_anthropic import ChatAnthropic
 from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import (
@@ -19,39 +18,19 @@ from llm_chat_term.chat_ui import ChatUI
 from llm_chat_term.config import ModelConfig, config
 
 
-class StreamingCallbackHandler(BaseCallbackHandler):
-    """Callback handler for streaming LLM responses."""
-
-    def __init__(self, stream_callback: Callable[[str], None]):
-        """Initialize with a callback function that will be called with each token."""
-        self.stream_callback = stream_callback
-
-    @override
-    def on_llm_new_token(self, token: str, **kwargs: Any) -> None:
-        """Pass the token to the callback function."""
-        self.stream_callback(token)
-
-
 def get_chunk_text_and_type(chunk: BaseMessageChunk) -> tuple[str, str]:
     """Get the text content and type of the message."""
     if isinstance(chunk.content, str):  # pyright: ignore[reportUnknownMemberType]
         return chunk.content, "text"
 
     # must be a list, extract the type from the first block
-    chunk.content = cast(list[dict[str, str] | str], chunk.content)
-    first_block = chunk.content[0]
-    first_block = cast(str | dict[str, str], first_block)
+    content: list[dict[str, str] | str] = chunk.content
+    # chunk.content = cast(list[dict[str, str] | str], chunk.content)
+    first_block = content[0]
     if isinstance(first_block, str):
         chunk_type = "text"
     else:
         chunk_type: str = first_block.get("type", "text")
-    blocks = [
-        block
-        for block in chunk.content
-        if isinstance(block, str)
-        or block.get("type") == "text"
-        and isinstance(block.get("text"), str)
-    ]
     return "".join(
         block if isinstance(block, str) else block.get(chunk_type, "text")
         for block in chunk.content
@@ -77,6 +56,7 @@ class LLMClient:
             self.ui.render_conversation(self.messages, self.chat_id)
 
     def configure_model(self, model_config: ModelConfig) -> None:
+        self.model_config = model_config
         if model_config.provider == "openai" and model_config.model.startswith("o"):
             temperature = 1.0
         else:
