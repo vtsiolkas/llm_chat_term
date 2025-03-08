@@ -20,4 +20,5 @@ def delete_chat(chat_id: str) -> None:
 def open_in_editor(chat_id: str):
     full_path = db.get_chat_file(chat_id)
     editor = os.environ.get("EDITOR", "vim")
-    subprocess.call([editor, str(full_path)])
+    # Assume that the user knows what EDITOR is set
+    subprocess.call([editor, str(full_path)])  # noqa: S603

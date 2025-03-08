@@ -15,7 +15,8 @@ def process_read_commands(user_input: str) -> str:
 
             # Check if file exists
             if not file_path.exists():
-                raise FileReadError(f"Error: File not found: {file_path}")
+                error_msg = f"Error: File not found: {file_path}"
+                raise FileReadError(error_msg)
 
             # Check if file is binary
             mime_type, _ = mimetypes.guess_type(file_path)
