@@ -13,16 +13,23 @@ from llm_chat_term.model_selector import select_model
 from llm_chat_term.read_file import process_read_commands
 
 
+def check_api_key():
+    model = config.llm.models[0]
+    if not model.api_key.get_secret_value():
+        error_msg = (
+            "API key for the default model is not set. "
+            "Please set it in your config.yaml file."
+        )
+        raise ValueError(error_msg)
+
+
 def main() -> NoReturn:
     """Run the terminal LLM chatbot application."""
     try:
-        model = config.llm.models[0]
-        if not model.api_key.get_secret_value():
-            raise ValueError(
-                "API key for the default model is not set. Please set it in your config.yaml file."
-            )
-    except Exception as e:
-        print(f"Error: {e}")
+        check_api_key()
+    except ValueError as e:
+        error_msg = f"Error: {e!s}\n"
+        sys.stderr.write(error_msg)
         sys.exit(1)
 
     # Set up signal handler for graceful exit
@@ -31,7 +38,8 @@ def main() -> NoReturn:
     try:
         selected_chat = select_chat()
     except Exception as e:
-        print("Exiting...", e)
+        error_msg = f"Error: {e!s}\n"
+        sys.stderr.write(error_msg)
         sys.exit(1)
 
     # Initialize UI and LLM client
@@ -49,15 +57,15 @@ def main() -> NoReturn:
             continue
         # Check for commands
         if user_input in (":exit", "exit"):
-            print("Exiting...")
+            sys.stderr.write("\nExiting...\n")
             break
-        elif user_input == ":help":
+        if user_input == ":help":
             ui.display_help()
             continue
-        elif user_input == ":info":
+        if user_input == ":info":
             ui.display_info(selected_chat)
             continue
-        elif user_input in [":edit", ":e"]:
+        if user_input in [":edit", ":e"]:
             if selected_chat:
                 utils.open_in_editor(selected_chat)
                 llm.parse_messages()
@@ -70,36 +78,40 @@ def main() -> NoReturn:
                     llm.chat_id = selected_chat
                     llm.parse_messages()
             continue
-        elif user_input == ":model":
+        if user_input == ":model":
             selected_model = select_model()
             llm.configure_model(selected_model)
             continue
-        elif user_input.startswith(":tmp"):
-            should_save = False
-        elif user_input == ":chat":
+        if user_input == ":chat":
             selected_chat = select_chat()
             llm = LLMClient(ui, selected_chat)
             continue
-        elif user_input == ":redraw":
+        if user_input == ":redraw":
             llm.parse_messages()
             continue
+        if user_input.startswith(":tmp"):
+            should_save = False
         elif user_input.startswith(":think"):
             should_think = True
         else:
             try:
                 user_input = process_read_commands(user_input)
             except Exception as e:
-                print(e)
+                error_msg = f"Error: {e!s}\n"
+                sys.stderr.write(error_msg)
                 continue
 
         # Add message to LLM client
-        llm.add_user_message(user_input, should_save)
+        llm.add_user_message(user_input, should_save=should_save)
 
         # Get and display streaming response
         try:
-            llm.get_response(ui.stream_token, should_think, should_save)
+            llm.get_response(
+                ui.stream_token, should_think=should_think, should_save=should_save
+            )
         except Exception as e:
-            print(f"Something went wrong... {str(e)}")
+            error_msg = f"Somethig went wrong... {e!s}\n"
+            sys.stderr.write(error_msg)
         should_think = False
         should_save = True
 

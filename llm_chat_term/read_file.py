@@ -1,5 +1,7 @@
 import mimetypes
-import os
+from pathlib import Path
+
+from llm_chat_term.exceptions import FileReadError
 
 
 def process_read_commands(user_input: str) -> str:
@@ -8,28 +10,31 @@ def process_read_commands(user_input: str) -> str:
     for line in user_input.splitlines():
         if line.strip().startswith(":read "):
             # Extract the file path
-            file_path = os.path.expanduser(line.strip()[6:].strip())
+            file_path = Path(line.strip()[6:])
+            file_path = file_path.expanduser()
 
             # Check if file exists
-            if not os.path.exists(file_path):
-                result_lines.append(f"Error: File not found: {file_path}")
-                continue
+            if not file_path.exists():
+                raise FileReadError(f"Error: File not found: {file_path}")
 
             # Check if file is binary
             mime_type, _ = mimetypes.guess_type(file_path)
             if mime_type and not mime_type.startswith(("text/", "application/json")):
-                raise Exception(f"Error: :read file appears to be binary: {file_path}")
+                error_msg = f"Error: :read file appears to be binary: {file_path}"
+                raise FileReadError(error_msg)
 
             try:
                 # Try to read the file
-                with open(file_path, "r", encoding="utf-8") as f:
+                with file_path.open(encoding="utf-8") as f:
                     file_contents = f.read()
                 # Add file contents instead of the :read line
                 result_lines.append(file_contents.rstrip())
-            except UnicodeDecodeError:
-                raise Exception(f"Error: :read file appears to be binary: {file_path}")
+            except UnicodeDecodeError as e:
+                error_msg = ()
+                raise FileReadError(error_msg) from e
             except Exception as e:
-                raise Exception(f"Error: Could not :read file: {file_path}: {str(e)}")
+                error_msg = f"Error: Could not :read file: {file_path}: {e!s}"
+                raise FileReadError(error_msg) from e
         else:
             # Keep the original line
             result_lines.append(line)

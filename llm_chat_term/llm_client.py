@@ -1,6 +1,7 @@
 """LLM client for the terminal chatbot using LangChain."""
 
-from typing import Callable, cast
+from collections.abc import Callable
+from typing import cast
 
 from langchain_anthropic import ChatAnthropic
 from langchain_core.language_models import BaseChatModel
@@ -25,7 +26,6 @@ def get_chunk_text_and_type(chunk: BaseMessageChunk) -> tuple[str, str]:
 
     # must be a list, extract the type from the first block
     content: list[dict[str, str] | str] = chunk.content
-    # chunk.content = cast(list[dict[str, str] | str], chunk.content)
     first_block = content[0]
     if isinstance(first_block, str):
         chunk_type = "text"
@@ -89,7 +89,7 @@ class LLMClient:
             )
             self.thinking_model = self.model
 
-    def add_user_message(self, content: str, should_save: bool = True) -> None:
+    def add_user_message(self, content: str, *, should_save: bool = True) -> None:
         """Add a user message to the conversation history."""
         self.messages.append(HumanMessage(content))
         if self.chat_id and should_save:
@@ -104,6 +104,7 @@ class LLMClient:
     def get_response(
         self,
         stream_callback: Callable[[str, str], None],
+        *,
         should_think: bool = False,
         should_save: bool = True,
     ) -> None:

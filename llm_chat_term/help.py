@@ -44,7 +44,7 @@ COMMANDS: dict[str, list[str]] = {
 def print_help(console: Console):
     console.print("Available commands", style=f"bold {config.colors.system}")
     console.print()
-    max_length: int = max(*[len(cmd) for cmd in COMMANDS.keys()])
+    max_length: int = max(*[len(cmd) for cmd in COMMANDS])
     padding = 4
     for cmd, info_list in COMMANDS.items():
         console.print(cmd, style=config.colors.system, end="")
@@ -55,6 +55,7 @@ def print_help(console: Console):
                 console.print(f"{info}", style=config.colors.system)
             else:
                 console.print(
-                    f"{' ' * (max_length + padding)}{info}", style=config.colors.system
+                    f"{' ' * (max_length + padding)}{info}",
+                    style=config.colors.system,
                 )
     console.print()

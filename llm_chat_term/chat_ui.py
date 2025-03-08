@@ -86,8 +86,7 @@ class ChatUI:
             f"{model_name:>{right_width}}"
         )
 
-        content = Text(formatted, style=f"bold black on {config.colors.user}")
-        return content
+        return Text(formatted, style=f"bold black on {config.colors.user}")
 
     def _get_markdown(self, content: str):
         try:

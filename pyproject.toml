@@ -43,3 +43,27 @@ reportUnannotatedClassAttribute = false
 reportAny = false
 reportExplicitAny = false
 
+[tool.ruff.lint]
+# Enable a large set of common rules
+select = ["ALL"]
+ignore = [
+    "D",
+    "ANN",
+    "BLE001",
+    "TRY003",
+    "COM812",
+    "E501",
+    "BLE001",
+    "S112",
+    "ARG005",
+    "C901",
+    "PLR0912",
+    "PLR0915"
+]
+
+
+[dependency-groups]
+dev = [
+    "ruff>=0.9.10",
+]
+

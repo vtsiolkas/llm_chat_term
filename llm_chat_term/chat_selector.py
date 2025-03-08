@@ -12,7 +12,7 @@ def handle_delete(event: KeyPressEvent, menu: Menu):
         return
     utils.delete_chat(menu.items[menu.selected_index])
     menu.items.pop(menu.selected_index)
-    setattr(menu, "selected_index", menu.selected_index - 1)
+    menu.selected_index = menu.selected_index - 1
     event.app.invalidate()
 
 
@@ -26,7 +26,7 @@ def select_chat() -> str:
     if len(all_chats) == 0:
         return create_new_chat()
 
-    chats = ["Create new chat"] + all_chats
+    chats = ["Create new chat", *all_chats]
 
     menu = Menu(
         chats,
@@ -45,7 +45,7 @@ def select_chat() -> str:
     return chats[result]
 
 
-def create_new_chat(allow_blank: bool = True) -> str:
+def create_new_chat(*, allow_blank: bool = True) -> str:
     """Prompt the user to create a new chat."""
     from prompt_toolkit import prompt
 

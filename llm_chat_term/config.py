@@ -72,23 +72,29 @@ def load_config() -> AppConfig:
             for model in default_config["llm"]["models"]:
                 model["api_key"] = ""
 
-            with open(config_file, "w") as f:
+            with config_file.open("w") as f:
                 yaml.dump(default_config, f, default_flow_style=False, sort_keys=False)
-            print(f"Created default configuration file at {config_file}")
-            print("Add your models/API key(s) there and start `term-chat` again")
+            sys.stdout.write(f"Created default configuration file at {config_file}\n")
+            sys.stdout.write(
+                "Add your models/API key(s) there and start `llm_chat_term` again\n",
+            )
             sys.exit(0)
         except Exception as e:
-            print(f"Error creating default config file: {e}")
+            error_msg = f"Error creating default config file: {e}\n"
+            sys.stderr.write(error_msg)
+            sys.exit(1)
     else:
         try:
-            with open(config_file, "r") as f:
+            with config_file.open() as f:
                 user_config = yaml.safe_load(f)
 
             if user_config:
                 # Update with user configuration
                 config = AppConfig.model_validate(user_config)
         except Exception as e:
-            print(f"Error loading config file: {e}")
+            error_msg = f"Error loading config file: {e!s}\n"
+            sys.stderr.write(error_msg)
+            sys.exit(1)
 
     return config
 

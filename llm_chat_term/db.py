@@ -23,7 +23,7 @@ def _get_config_dir() -> Path:
         xdg_config_home = os.environ.get("XDG_CONFIG_HOME")
         if xdg_config_home:
             config_dir = Path(xdg_config_home) / "llm_chat_term"
-        elif os.path.exists(home / ".config"):
+        elif (home / ".config").exists():
             config_dir = home / ".config" / "llm_chat_term"
         else:  # macOS fallback
             config_dir = home / "Library" / "Preferences" / "llm_chat_term"
@@ -44,7 +44,7 @@ def _get_data_dir() -> Path:
         xdg_data_home = os.environ.get("XDG_DATA_HOME")
         if xdg_data_home:
             data_dir = Path(xdg_data_home) / "llm_chat_term"
-        elif os.path.exists(home / ".local" / "share"):  # Linux
+        elif (home / ".local" / "share").exists():  # Linux
             data_dir = home / ".local" / "share" / "llm_chat_term"
         else:  # macOS
             data_dir = home / "Library" / "Application Support" / "llm_chat_term"
@@ -82,7 +82,7 @@ def save_chat_history(chat_id: str, messages: list[dict[str, str]]):
     """
     file_path = get_chat_file(chat_id)
 
-    with open(file_path, "w", encoding="utf-8") as f:
+    with file_path.open("w", encoding="utf-8") as f:
         for message in messages:
             f.write(f"{MESSAGE_START} {message['role']} {MESSAGE_START}\n")
             f.write(f"{message['content']}\n")
@@ -103,7 +103,7 @@ def load_chat_history(chat_id: str) -> list[dict[str, str]]:
         return []
 
     messages: list[dict[str, str]] = []
-    with open(file_path, "r", encoding="utf-8") as f:
+    with file_path.open(encoding="utf-8") as f:
         lines = f.read().splitlines()
         last_index = len(lines) - 1
 
@@ -148,7 +148,7 @@ def list_all_chats() -> list[str]:
     for file_path in data_dir.glob("*.txt"):
         try:
             chat_id = _decode_filepath(file_path)
-            mod_time = os.path.getmtime(file_path)
+            mod_time = file_path.stat().st_mtime
             chats_with_time.append((chat_id, mod_time))
         except Exception:
             # Skip files that can't be decoded properly
