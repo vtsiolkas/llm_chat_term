@@ -1,6 +1,6 @@
 [project]
 name = "llm_chat_term"
-version = "0.1.4"
+version = "0.1.5"
 description = "Chat with LLMs from the terminal"
 authors = [
     {name = "Vasilis Tsiolkas", email = "tsiolkas@gmail.com"}
@@ -61,9 +61,8 @@ ignore = [
     "PLR0915"
 ]
 
-
 [dependency-groups]
 dev = [
+    "pre-commit>=4.1.0",
     "ruff>=0.9.10",
 ]
-
