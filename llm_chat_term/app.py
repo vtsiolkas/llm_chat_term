@@ -38,6 +38,7 @@ def main() -> NoReturn:
     ui = ChatUI()
     llm = LLMClient(ui, selected_chat)
     should_think = False
+    should_save = True
 
     # Main application loop
     while True:
@@ -73,6 +74,8 @@ def main() -> NoReturn:
             selected_model = select_model()
             llm.configure_model(selected_model)
             continue
+        elif user_input.startswith(":tmp"):
+            should_save = False
         elif user_input == ":chat":
             selected_chat = select_chat()
             llm = LLMClient(ui, selected_chat)
@@ -90,14 +93,15 @@ def main() -> NoReturn:
                 continue
 
         # Add message to LLM client
-        llm.add_user_message(user_input)
+        llm.add_user_message(user_input, should_save)
 
         # Get and display streaming response
         try:
-            llm.get_response(ui.stream_token, should_think)
+            llm.get_response(ui.stream_token, should_think, should_save)
         except Exception as e:
             print(f"Something went wrong... {str(e)}")
         should_think = False
+        should_save = True
 
         # End streaming
         ui.end_streaming()

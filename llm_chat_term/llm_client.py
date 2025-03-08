@@ -89,10 +89,10 @@ class LLMClient:
             )
             self.thinking_model = self.model
 
-    def add_user_message(self, content: str) -> None:
+    def add_user_message(self, content: str, should_save: bool = True) -> None:
         """Add a user message to the conversation history."""
         self.messages.append(HumanMessage(content))
-        if self.chat_id:
+        if self.chat_id and should_save:
             db.save_chat_history(self.chat_id, self.get_conversation_history())
 
     def add_assistant_message(self, content: str) -> None:
@@ -102,7 +102,10 @@ class LLMClient:
             db.save_chat_history(self.chat_id, self.get_conversation_history())
 
     def get_response(
-        self, stream_callback: Callable[[str, str], None], should_think: bool = False
+        self,
+        stream_callback: Callable[[str, str], None],
+        should_think: bool = False,
+        should_save: bool = True,
     ) -> None:
         """Get a response from the LLM and stream it through the callback."""
         model = self.thinking_model if should_think else self.model
@@ -114,7 +117,8 @@ class LLMClient:
             text, chunk_type = get_chunk_text_and_type(chunk)
             stream_callback(text, chunk_type)
             response += chunk.text()
-        self.add_assistant_message(response)
+        if should_save:
+            self.add_assistant_message(response)
 
     def parse_messages(self):
         messages_dict = db.load_chat_history(self.chat_id)

@@ -12,7 +12,8 @@ COMMANDS: dict[str, list[str]] = {
     ],
     ":edit :e": [
         "Opens the conversation history in $EDITOR (vim by default).",
-        "Edit it and save and it will be reloaded in the message history."
+        "Edit it and save and it will be reloaded in the message history.",
+        "You can edit the system prompt for the current conversation this way."
     ],
     ":chat": [
         "Display the menu to select a different chat."
@@ -22,6 +23,10 @@ COMMANDS: dict[str, list[str]] = {
     ],
     ":redraw": [
         "Redraw the whole conversation."
+    ],
+    ":tmp {prompt}": [
+        "This prompt won't be saved to the conversation history.",
+        "Ideal for quick one-off questions in the middle of a large conversation",
     ],
     ":think {prompt}": [
         "Enable thinking mode only for this question (Claude only)."
