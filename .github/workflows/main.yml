@@ -26,7 +26,7 @@ jobs:
         with:
           version: "0.5.29"
       - name: Install dependencies
-        run: uv add --dev pre-commit
+        run: uv tool install pre-commit
       - name: Run pre-commit
         run: pre-commit run --all-files
 
