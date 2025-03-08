@@ -16,10 +16,10 @@ COMMANDS: dict[str, list[str]] = {
         "You can edit the system prompt for the current conversation this way."
     ],
     ":chat": [
-        "Display the menu to select a different chat."
+        "Display a menu to select a different chat."
     ],
     ":model": [
-        "Display the menu to select a different chat."
+        "Display a menu to select a different chat."
     ],
     ":redraw": [
         "Redraw the whole conversation."
@@ -34,6 +34,9 @@ COMMANDS: dict[str, list[str]] = {
     ":read {path}": [
         "Embed a text file in the prompt (replaces the line with :read)."
     ],
+    ":web {url}": [
+        "Embed a webpage contents in the prompt (replaces the line with :web)."
+    ],
     ":exit": [
         "Exits the application. The conversation is saved if not anonymous chat."
     ],
@@ -44,7 +47,7 @@ COMMANDS: dict[str, list[str]] = {
 def print_help(console: Console):
     console.print("Available commands", style=f"bold {config.colors.system}")
     console.print()
-    max_length: int = max(*[len(cmd) for cmd in COMMANDS])
+    max_length: int = max([len(cmd) for cmd in COMMANDS])
     padding = 4
     for cmd, info_list in COMMANDS.items():
         console.print(cmd, style=config.colors.system, end="")

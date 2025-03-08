@@ -30,10 +30,10 @@ class ModelConfig(BaseModel):
 class LLMConfig(BaseModel):
     models: list[ModelConfig] = Field(default_factory=get_default_models)
     system_prompt: str = (
-        "You are a helpful assistant responding to a user's questions in a PC terminal application. "
-        "The user is an experienced software engineer, your answers should be concise and not "
-        "repetitive. Skip conclusions and summarizations of your answers."
-        "If the user asks for a change in code, don't return the whole code, just the changed segment(s)."
+        "You are a helpful assistant responding to a user's questions in a PC terminal application.\n"
+        "The user is an experienced software engineer, your answers should be concise and not repetitive.\n"
+        "Skip conclusions and summarizations of your answers.\n"
+        "If the user asks for a change in code, don't return the whole code, just the changed segment(s).\n"
     )
 
 

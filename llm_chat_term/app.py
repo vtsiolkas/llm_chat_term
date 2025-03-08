@@ -8,9 +8,9 @@ from llm_chat_term import db, utils
 from llm_chat_term.chat_selector import create_new_chat, select_chat
 from llm_chat_term.chat_ui import ChatUI
 from llm_chat_term.config import config
+from llm_chat_term.insert_commands import parse_insert_commands
 from llm_chat_term.llm_client import LLMClient
 from llm_chat_term.model_selector import select_model
-from llm_chat_term.read_file import process_read_commands
 
 
 def check_api_key():
@@ -77,6 +77,10 @@ def main() -> NoReturn:
                     utils.open_in_editor(selected_chat)
                     llm.chat_id = selected_chat
                     llm.parse_messages()
+                else:
+                    sys.stderr.write(
+                        "Cannot edit conversation without a chat name...\n"
+                    )
             continue
         if user_input == ":model":
             selected_model = select_model()
@@ -95,7 +99,7 @@ def main() -> NoReturn:
             should_think = True
         else:
             try:
-                user_input = process_read_commands(user_input)
+                user_input = parse_insert_commands(user_input)
             except Exception as e:
                 error_msg = f"Error: {e!s}\n"
                 sys.stderr.write(error_msg)

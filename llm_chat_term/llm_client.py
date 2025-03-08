@@ -134,6 +134,7 @@ class LLMClient:
 
         if not any(isinstance(message, SystemMessage) for message in self.messages):
             self.messages.insert(0, SystemMessage(config.llm.system_prompt))
+            db.save_chat_history(self.chat_id, self.get_conversation_history())
 
         self.ui.render_conversation(self.messages, self.chat_id)
 

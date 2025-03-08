@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 from urllib.parse import quote_plus, unquote_plus
 
-MESSAGE_START = "!-------------------------@"
+MESSAGE_INDICATOR = "▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒"
 
 
 def get_chat_file(chat_id: str) -> Path:
@@ -83,8 +83,15 @@ def save_chat_history(chat_id: str, messages: list[dict[str, str]]):
     file_path = get_chat_file(chat_id)
 
     with file_path.open("w", encoding="utf-8") as f:
+        max_role_width = max([len(message["role"]) for message in messages])
         for message in messages:
-            f.write(f"{MESSAGE_START} {message['role']} {MESSAGE_START}\n")
+            role = message["role"]
+            padding = max_role_width - len(role)
+            left_padding = padding // 2
+            right_padding = padding - left_padding
+            padded_role = " " * left_padding + role + " " * right_padding
+
+            f.write(f"{MESSAGE_INDICATOR} {padded_role} {MESSAGE_INDICATOR}\n")
             f.write(f"{message['content']}\n")
 
 
@@ -110,8 +117,8 @@ def load_chat_history(chat_id: str) -> list[dict[str, str]]:
         msg_role = ""
         msg_content = ""
         for i, line in enumerate(lines):
-            if line.startswith(f"{MESSAGE_START}") and line.endswith(
-                f"{MESSAGE_START}"
+            if line.startswith(f"{MESSAGE_INDICATOR}") and line.endswith(
+                f"{MESSAGE_INDICATOR}"
             ):
                 messages.append(
                     {
@@ -121,7 +128,7 @@ def load_chat_history(chat_id: str) -> list[dict[str, str]]:
                 )
                 msg_content = ""
                 # Extract next message type if not last file line
-                msg_role = line.split(f"{MESSAGE_START}")[1].strip()
+                msg_role = line.split(f"{MESSAGE_INDICATOR}")[1].strip()
             elif i == last_index:
                 msg_content += line + "\n"
                 messages.append(

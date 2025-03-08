@@ -24,6 +24,7 @@ dependencies = [
     "python-dotenv>=1.0.1",
     "pyyaml>=6.0.2",
     "rich>=13.9.4",
+    "trafilatura>=2.0.0",
 ]
 
 [project.urls]
@@ -51,11 +52,13 @@ ignore = [
     "ANN",
     "BLE001",
     "TRY003",
+    "TRY301",
     "COM812",
     "E501",
     "BLE001",
     "S112",
     "ARG005",
+    "UP034",
     "C901",
     "PLR0912",
     "PLR0915"

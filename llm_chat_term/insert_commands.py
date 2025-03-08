@@ -1,10 +1,13 @@
 import mimetypes
 from pathlib import Path
 
-from llm_chat_term.exceptions import FileReadError
+import trafilatura
+from pydantic import HttpUrl
+
+from llm_chat_term.exceptions import FileReadError, UrlReadError
 
 
-def process_read_commands(user_input: str) -> str:
+def parse_insert_commands(user_input: str) -> str:
     result_lines: list[str] = []
 
     for line in user_input.splitlines():
@@ -31,11 +34,40 @@ def process_read_commands(user_input: str) -> str:
                 # Add file contents instead of the :read line
                 result_lines.append(file_contents.rstrip())
             except UnicodeDecodeError as e:
-                error_msg = ()
+                error_msg = f"Error: :read file appears to be binary: {file_path}"
                 raise FileReadError(error_msg) from e
             except Exception as e:
                 error_msg = f"Error: Could not :read file: {file_path}: {e!s}"
                 raise FileReadError(error_msg) from e
+        elif line.strip().startswith(":web "):
+            url = line.strip()[5:]
+            try:
+                url = HttpUrl(url)
+            except ValueError as e:
+                error_msg = f"Error: Could not parse url {url}"
+                raise UrlReadError(error_msg) from e
+
+            try:
+                downloaded = trafilatura.fetch_url(str(url))
+                error_msg = f"Error: Could not :web url: {url}"
+                if downloaded:
+                    text = trafilatura.extract(
+                        downloaded,
+                        with_metadata=True,
+                        deduplicate=True,
+                    )
+                    if not text:
+                        raise UrlReadError(error_msg)
+                    result_lines.append(
+                        f"The following text was extracted from {url}:\n{text}"
+                    )
+                    continue
+
+                raise UrlReadError(error_msg)
+            except Exception as e:
+                error_msg = f"Error: Could not :web url: {url}: {e!s}"
+                raise UrlReadError(error_msg) from e
+
         else:
             # Keep the original line
             result_lines.append(line)

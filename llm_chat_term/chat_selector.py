@@ -57,19 +57,31 @@ def create_new_chat(*, allow_blank: bool = True) -> str:
     prompt_text = "Enter a name"
     prompt_text += "(blank for anonymous chat): " if allow_blank else ": "
 
-    try:
-        chat_id = prompt(prompt_text)
-    except KeyboardInterrupt:
-        if allow_blank:
-            console.print("\nExiting...")
-            sys.exit(0)
-        else:
-            chat_id = ""
-            console.print("Cannot edit conversation with a chat name...")
+    while True:
+        try:
+            chat_id = prompt(prompt_text)
+        except KeyboardInterrupt:
+            if allow_blank:
+                console.print("\nExiting...")
+                sys.exit(0)
+            else:
+                chat_id = ""
+                console.print("Cannot edit conversation without a chat name...")
 
-    chat_id = chat_id.strip()
+        chat_id = chat_id.strip()
 
-    if chat_id:
-        console.print(f"[blue]Created new chat: {chat_id}[/blue]")
+        if chat_id:
+            file_path = db.get_chat_file(chat_id)
+            if file_path.exists():
+                console.print(
+                    (
+                        f"[red]Chat [bold]{chat_id}[/bold] "
+                        f"already exists at: [bold]{file_path}[/bold][/red]"
+                    )
+                )
+                continue
+            console.print(
+                f"[blue]Chat conversation will be persisted to: {file_path}[/blue]"
+            )
 
-    return chat_id
+        return chat_id
