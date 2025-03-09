@@ -27,9 +27,9 @@ uv tool install llm_chat_term
 or if you don't have uv installed:
 
 ```bash
-pip install llm_chat_term
+pip install llm-chat-term
 # or
-pipx install llm_chat_term
+pipx install llm-chat-term
 ```
 
 ### Set up your API key(s)
