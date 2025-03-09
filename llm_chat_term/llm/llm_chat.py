@@ -106,6 +106,7 @@ class LLMChat:
                 continue
             if user_input == ":redraw":
                 self.client.parse_messages(self.chat_id)
+                self.ui.render_conversation(self.client.messages, self.chat_id)
                 continue
             if user_input.startswith(":tmp"):
                 should_save = False
