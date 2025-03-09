@@ -1,8 +1,6 @@
 # Terminal LLM Chatbot
 
-A python terminal-based chatbot application that integrates with language models. Features include multiline text input, streaming responses and many commands to
-
-The idea came from
+A python terminal-based chatbot application that integrates with language models. Features include multiline text input, streaming responses and many commands to control the conversation.
 
 ## Features
 
@@ -14,7 +12,7 @@ The idea came from
 - Anonymous chats that don't get saved anywhere
 - You can edit the conversation at any point to add/remove context or edit the system prompt
 - Change active model/conversation on the fly
-- Embed files from the filesystem or webpage content by url in your prompts
+- Embed files from the filesystem or webpage contents by url in your prompts
 - Quick temporary prompts that don't pollute the current conversation context
 - Configurable via a YAML config file
 
@@ -59,30 +57,30 @@ llm_chat_term
 
 ### Commands
 
-- :help
+- `:help`
   Displays help about the commands.
-- :info
+- `:info`
   Displays info about this chat.
-- :edit, :e
+- `:edit`, `:e`
   Opens the conversation history in $EDITOR (vim by default).
   Edit it and save and it will be reloaded in the message history.
   You can edit the system prompt for the current conversation this way.
-- :chat
+- `:chat`
   Display a menu to select a different chat.
-- :model
+- `:model`
   Display a menu to select a different chat.
-- :redraw
+- `:redraw`
   Redraw the whole conversation.
-- :tmp {prompt}
+- `:tmp {prompt}`
   This prompt won't be saved to the conversation history.
   Ideal for quick one-off questions in the middle of a large conversation
-- :think {prompt}
+- `:think {prompt}`
   Enable thinking mode only for this question (Claude only).
-- :read {path}
+- `:read {path}`
   Embed a text file in the prompt (replaces the line with :read).
-- :web {url}
+- `:web {url}`
   Embed a webpage contents in the prompt (replaces the line with :web).
-- :exit
+- `:exit`
   Exits the application. The conversation is saved if not anonymous chat.
 
 ## Configuration
