@@ -1,4 +1,5 @@
 import mimetypes
+import sys
 from pathlib import Path
 
 import trafilatura
@@ -15,6 +16,7 @@ def parse_insert_commands(user_input: str) -> str:
             # Extract the file path
             file_path = Path(line.strip()[6:])
             file_path = file_path.expanduser()
+            sys.stdout.write(f"Embedding file: {file_path}\n")
 
             # Check if file exists
             if not file_path.exists():
@@ -41,6 +43,7 @@ def parse_insert_commands(user_input: str) -> str:
                 raise FileReadError(error_msg) from e
         elif line.strip().startswith(":web "):
             url = line.strip()[5:]
+            sys.stdout.write(f"Embedding url: {url}\n")
             try:
                 url = HttpUrl(url)
             except ValueError as e:

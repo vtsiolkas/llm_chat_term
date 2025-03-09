@@ -4,7 +4,7 @@ from prompt_toolkit.key_binding import KeyPressEvent
 from rich.console import Console
 
 from llm_chat_term import db, utils
-from llm_chat_term.prompt_menu import Menu
+from llm_chat_term.ui.prompt_menu import Menu
 
 
 def handle_delete(event: KeyPressEvent, menu: Menu):

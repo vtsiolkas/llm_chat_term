@@ -14,7 +14,9 @@ from rich.syntax import Syntax
 from rich.text import Text
 
 from llm_chat_term.config import config
-from llm_chat_term.help import print_help
+from llm_chat_term.ui.chat_selector import create_new_chat, select_chat
+from llm_chat_term.ui.help import print_help
+from llm_chat_term.ui.model_selector import select_model
 
 
 class CodeBlockNoPadding(CodeBlock):
@@ -121,6 +123,15 @@ class ChatUI:
         else:
             self.console.print("Anonymous chat", style=f"bold {config.colors.system}")
 
+    def create_new_chat(self, *, allow_blank: bool = False):
+        return create_new_chat(allow_blank=allow_blank)
+
+    def select_chat(self):
+        return select_chat()
+
+    def select_model(self):
+        return select_model()
+
     def get_user_input(self, model_name: str, chat_id: str) -> str:
         """Get multiline input from the user."""
         try:
@@ -168,7 +179,7 @@ class ChatUI:
         text = self._get_markdown(self.current_response)
 
         content = Group(self._get_ai_title(), text)
-        self.live.update(content)
+        self.live.update(content, refresh=True)
 
     def display_loader(self):
         self.console.print("[yellow]Contemplating...[/yellow]")
