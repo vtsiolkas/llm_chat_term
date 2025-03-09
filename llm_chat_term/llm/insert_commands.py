@@ -1,11 +1,42 @@
 import mimetypes
+import subprocess
 import sys
 from pathlib import Path
 
 import trafilatura
+from playwright.sync_api import sync_playwright
 from pydantic import HttpUrl
 
 from llm_chat_term.exceptions import FileReadError, UrlReadError
+
+
+def fetch_with_playwright(url: str) -> str:
+    with sync_playwright() as p:
+        browser = None
+        try:
+            browser = p.chromium.launch(headless=True)
+        except Exception:
+            sys.stdout.write("Installing chromium with playwright...\n")
+            result = subprocess.run(
+                [sys.executable, "-m", "playwright", "install", "chromium"],
+                capture_output=True,
+                text=True,
+            )
+            if result.returncode != 0:
+                sys.stdout.write(
+                    f"Failed to install Playwright browsers: {result.stderr}\n"
+                )
+                return ""
+            else:
+                browser = p.chromium.launch(headless=True)
+
+        page = browser.new_page()
+        page.goto(url)
+        # Wait for network activity to settle
+        page.wait_for_load_state("networkidle")
+        content = page.content()
+        browser.close()
+        return content
 
 
 def parse_insert_commands(user_input: str) -> str:
@@ -51,12 +82,14 @@ def parse_insert_commands(user_input: str) -> str:
                 raise UrlReadError(error_msg) from e
 
             try:
-                downloaded = trafilatura.fetch_url(str(url))
+                html = fetch_with_playwright(str(url))
                 error_msg = f"Error: Could not :web url: {url}"
-                if downloaded:
+                if html:
                     text = trafilatura.extract(
-                        downloaded,
+                        html,
+                        favor_recall=True,
                         with_metadata=True,
+                        include_links=True,
                         deduplicate=True,
                     )
                     if not text:
