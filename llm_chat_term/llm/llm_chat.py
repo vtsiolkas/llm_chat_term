@@ -110,6 +110,7 @@ class LLMChat:
                 continue
             if user_input.startswith(":tmp"):
                 should_save = False
+                user_input = user_input[4:]
             elif user_input.startswith(":think"):
                 should_think = True
             else:
@@ -120,29 +121,18 @@ class LLMChat:
                     sys.stderr.write(error_msg)
                     continue
 
-            # Add message to LLM client
-            self.client.add_user_message(user_input)
-            if self.chat_id and should_save:
-                db.save_chat_history(
-                    self.chat_id, self.client.get_conversation_history()
-                )
-
             # Get and display streaming response
             self.ui.display_loader()
             try:
-                response = self.client.get_response(
+                self.client.get_response(
                     self.ui.stream_token,
+                    user_input,
+                    chat_id=self.chat_id,
                     should_think=should_think,
+                    should_save=should_save,
                 )
-                if should_save:
-                    self.client.add_assistant_message(response)
-                    if self.chat_id:
-                        db.save_chat_history(
-                            self.chat_id, self.client.get_conversation_history()
-                        )
-
             except Exception as e:
-                error_msg = f"Somethig went wrong... {e!s}\n"
+                error_msg = f"Something went wrong... {e!s}\n"
                 sys.stderr.write(error_msg)
             should_think = False
             should_save = True

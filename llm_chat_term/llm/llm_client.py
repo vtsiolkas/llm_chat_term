@@ -90,20 +90,31 @@ class LLMClient:
     def get_response(
         self,
         stream_callback: Callable[[str, str], None],
+        user_message: str,
         *,
+        chat_id: str = "",
         should_think: bool = False,
-    ) -> str:
+        should_save: bool = False,
+        # For :tmp handling, we don't append user message to conversation history
+        # but we only send it for the current response
+    ) -> None:
         """Get a response from the LLM and stream it through the callback."""
         model = self.thinking_model if should_think else self.model
         model = cast(BaseChatModel, model)
 
         response = ""
+        messages = self.messages[:]
+        messages.append(HumanMessage(user_message))
         for chunk in model.stream(self.messages):
             text, chunk_type = get_chunk_text_and_type(chunk)
             stream_callback(text, chunk_type)
             response += chunk.text()
 
-        return response
+        if should_save:
+            self.messages = messages
+            self.messages.append(AIMessage(response))
+            if chat_id:
+                db.save_chat_history(chat_id, self.get_conversation_history())
 
     def parse_messages(self, chat_id: str):
         messages_dict = db.load_chat_history(chat_id)
