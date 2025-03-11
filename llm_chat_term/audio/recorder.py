@@ -1,3 +1,4 @@
+import logging
 import sys
 import tempfile
 import wave
@@ -7,6 +8,10 @@ import pyaudio
 from pydub import AudioSegment
 
 from llm_chat_term.audio.pyaudio_no_log import PyAudioNoLog
+
+# Silence tye pydub logger
+pydub_logger = logging.getLogger("pydub.converter")
+pydub_logger.setLevel(logging.CRITICAL + 1)
 
 
 def record_audio(
