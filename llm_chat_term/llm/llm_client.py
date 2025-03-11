@@ -1,5 +1,6 @@
 """LLM client for the terminal chatbot using LangChain."""
 
+import json
 from collections.abc import Callable
 from typing import cast
 
@@ -11,12 +12,15 @@ from langchain_core.messages import (
     BaseMessageChunk,
     HumanMessage,
     SystemMessage,
+    ToolMessage,
+    message_chunk_to_message,
 )
 from langchain_openai import ChatOpenAI
 from pydantic import SecretStr
 
 from llm_chat_term import db
 from llm_chat_term.config import ModelConfig, config
+from llm_chat_term.llm.tools import process_tool_request, tools
 
 
 def get_chunk_text_and_type(chunk: BaseMessageChunk) -> tuple[str, str]:
@@ -32,7 +36,7 @@ def get_chunk_text_and_type(chunk: BaseMessageChunk) -> tuple[str, str]:
     else:
         chunk_type: str = first_block.get("type", "text")
     return "".join(
-        block if isinstance(block, str) else block.get(chunk_type, "text")  # pyright: ignore[reportUnknownMemberType, reportUnknownArgumentType]
+        block if isinstance(block, str) else block.get(chunk_type, "")  # pyright: ignore[reportUnknownMemberType, reportUnknownArgumentType]
         for block in chunk.content  # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType]
     ), chunk_type
 
@@ -51,6 +55,7 @@ class LLMClient:
             temperature = 1.0
         else:
             temperature = model_config.temperature or 0.4
+        temperature = 1.0
         if model_config.provider == "anthropic":
             self.model = ChatAnthropic(  # pyright: ignore[reportCallIssue]
                 api_key=api_key,
@@ -60,6 +65,7 @@ class LLMClient:
                 stream_usage=False,
                 streaming=True,
             )
+            self.model = self.model.bind_tools(tools)  # pyright: ignore[reportUnknownMemberType]
             self.thinking_model = ChatAnthropic(  # pyright: ignore[reportCallIssue]
                 api_key=api_key,
                 model=model_config.name,  # pyright: ignore[reportCallIssue]
@@ -77,6 +83,7 @@ class LLMClient:
                 max_tokens=16384,  # pyright: ignore[reportCallIssue]
                 streaming=True,
             )
+            self.model = self.model.bind_tools(tools)  # pyright: ignore[reportUnknownMemberType]
             self.thinking_model = self.model
 
     def add_user_message(self, content: str) -> None:
@@ -104,11 +111,43 @@ class LLMClient:
 
         response = ""
         messages = self.messages[:]
-        messages.append(HumanMessage(user_message))
+        if user_message:
+            messages.append(HumanMessage(user_message))
+        is_tool = False
+        tool_json = ""
+        tool_name = ""
+        tool_call_id = ""
+        tool_message: BaseMessageChunk | None = None
         for chunk in model.stream(messages):
-            text, chunk_type = get_chunk_text_and_type(chunk)
-            stream_callback(text, chunk_type)
-            response += chunk.text()
+            if (
+                isinstance(chunk.content, list)
+                and len(chunk.content) >= 0
+                and isinstance(chunk.content[0], dict)
+                and chunk.content[0].get("type") == "tool_use"
+            ):
+                block = cast(dict[str, str], chunk.content[0])
+                if not is_tool:
+                    is_tool = True
+                    tool_name = block["name"]
+                    tool_call_id = block["id"]
+                    tool_message = chunk
+                else:
+                    tool_json += block["partial_json"]
+                    if tool_message:
+                        tool_message = tool_message + chunk
+            else:
+                text, chunk_type = get_chunk_text_and_type(chunk)
+                stream_callback(text, chunk_type)
+                response += chunk.text()
+        if is_tool and tool_message:
+            stream_callback(f"Calling tool {tool_name}\n", "text")
+            tool_result = process_tool_request(tool_name, json.loads(tool_json))
+            ai_tool_message = message_chunk_to_message(tool_message)
+            self.messages.append(ai_tool_message)
+            self.messages.append(ToolMessage(tool_result, tool_call_id=tool_call_id))
+            self.get_response(
+                "", stream_callback, chat_id=chat_id, should_save=should_save
+            )
 
         if should_save:
             self.messages = messages
