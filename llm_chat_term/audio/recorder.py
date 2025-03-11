@@ -1,6 +1,6 @@
-import logging
 import sys
 import tempfile
+import warnings
 import wave
 from pathlib import Path
 
@@ -9,14 +9,13 @@ from pydub import AudioSegment
 
 from llm_chat_term.audio.pyaudio_no_log import PyAudioNoLog
 
-# Silence tye pydub logger
-pydub_logger = logging.getLogger("pydub.converter")
-pydub_logger.setLevel(logging.CRITICAL + 1)
+# Silence tye pydub warnings coming from broken regexes
+warnings.filterwarnings("ignore", category=SyntaxWarning, module="pydub.utils")
 
 
 def record_audio(
     audio_device_idx: int,
-    sample_rate: int = 44100,
+    sample_rate: int = 16000,
     channels: int = 1,
     chunk: int = 1024,
 ) -> str | None:

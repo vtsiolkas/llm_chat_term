@@ -71,10 +71,10 @@ def save_config(conf: AppConfig) -> None:
     conf_dict = conf.model_dump()
 
     for api_key in conf_dict["llm"]["api_keys"]:
-        api_key["api_key"] = conf_dict["llm"]["api_keys"].get_secret_value()
+        api_key["api_key"] = api_key["api_key"].get_secret_value()
 
     with config_file.open("w") as f:
-        yaml.dump(conf, f, default_flow_style=False, sort_keys=False)
+        yaml.dump(conf_dict, f, default_flow_style=False, sort_keys=False)
 
 
 def load_config() -> AppConfig:

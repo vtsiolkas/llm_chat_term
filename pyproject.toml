@@ -29,6 +29,7 @@ dependencies = [
 
 [project.optional-dependencies]
 voice = [
+    "llm-chat-term",
     "pyaudio>=0.2.14",
     "pydub>=0.25.1",
 ]
@@ -72,6 +73,9 @@ ignore = [
     "PLR0912",
     "PLR0915"
 ]
+
+[tool.uv.sources]
+llm-chat-term = { workspace = true }
 
 [dependency-groups]
 dev = [

@@ -506,6 +506,7 @@ requires-dist = [
     { name = "langchain", specifier = ">=0.3.19" },
     { name = "langchain-anthropic", specifier = ">=0.3.8" },
     { name = "langchain-openai", specifier = ">=0.3.7" },
+    { name = "llm-chat-term", marker = "extra == 'voice'", editable = "." },
     { name = "prompt-toolkit", specifier = ">=3.0.50" },
     { name = "pyaudio", marker = "extra == 'voice'", specifier = ">=0.2.14" },
     { name = "pydub", marker = "extra == 'voice'", specifier = ">=0.25.1" },
