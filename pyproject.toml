@@ -21,10 +21,19 @@ dependencies = [
     "langchain-anthropic>=0.3.8",
     "langchain-openai>=0.3.7",
     "prompt-toolkit>=3.0.50",
+    "pyaudio>=0.2.14",
+    "pydub>=0.25.1",
+    "pydub-stubs>=0.25.1.5",
     "python-dotenv>=1.0.1",
     "pyyaml>=6.0.2",
     "rich>=13.9.4",
     "trafilatura>=2.0.0",
+]
+
+[project.optional-dependencies]
+voice = [
+    "pyaudio",
+    "pydub",
 ]
 
 [project.urls]
@@ -60,6 +69,9 @@ ignore = [
     "ARG005",
     "UP034",
     "C901",
+    "TD002",
+    "TD003",
+    "FIX002",
     "PLR0912",
     "PLR0915"
 ]

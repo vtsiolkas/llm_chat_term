@@ -73,6 +73,8 @@ def _decode_filepath(file_path: Path) -> str:
     return unquote_plus(file_path.stem)
 
 
+# TODO: Sometimes we get a ".txt" file in the chats dir
+# Investigate
 def save_chat_history(chat_id: str, messages: list[dict[str, str]]):
     """Save chat history to a text file.
 

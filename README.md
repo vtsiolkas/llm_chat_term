@@ -14,6 +14,7 @@ A python terminal-based chatbot application that integrates with language models
 - Change active model/conversation on the fly
 - Embed files from the filesystem or webpage contents by url in your prompts
 - Quick temporary prompts that don't pollute the current conversation context
+- Optional voice input support
 - Configurable via a YAML config file
 
 ## Installation
@@ -31,6 +32,8 @@ pip install llm-chat-term
 # or
 pipx install llm-chat-term
 ```
+
+If you want voice input support, you will need to have `portaudio` and `ffmpeg` installed for your system. Then, install the `llm_chat_term[voice]` instead of the base `llm_chat_term` package.
 
 ### Set up your API key(s)
 

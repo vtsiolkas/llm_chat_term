@@ -7,7 +7,7 @@ def select_model() -> ModelConfig:
 
     menu = Menu(
         [model.name for model in models],
-        " Select a chat (j/k to move, Enter to select, e to edit, d to delete, q to quit):\n",
+        " Select a model (j/k to move, Enter to select, e to edit, d to delete, q to quit):\n",
     )
 
     result = menu.run()

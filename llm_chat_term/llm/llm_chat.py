@@ -1,10 +1,10 @@
-import os
 import sys
 
 from langchain_core.messages import SystemMessage
 from pydantic import SecretStr
 
 from llm_chat_term import db, utils
+from llm_chat_term.audio.voice_command import process_voice_command
 from llm_chat_term.config import ModelConfig, config
 from llm_chat_term.llm.insert_commands import parse_insert_commands
 from llm_chat_term.llm.llm_client import LLMClient
@@ -15,9 +15,11 @@ class LLMChat:
     def __init__(self):
         self.ui = ChatUI()
         available_model: ModelConfig | None = None
+
+        self.api_key = SecretStr("")
         for model in config.llm.models:
             try:
-                self.api_key = self._get_api_key(model)
+                self.api_key = utils.get_api_key(model.provider)
             except ValueError:
                 continue
             else:
@@ -53,10 +55,14 @@ class LLMChat:
     def start_chat(self):
         should_think = False
         should_save = True
+        recorded_prompt: str = ""
 
         while True:
             # Get user input
-            user_input = self.ui.get_user_input(self.model.name, self.chat_id)
+            user_input = self.ui.get_user_input(
+                self.model.name, self.chat_id, prefilled_prompt=recorded_prompt
+            )
+            recorded_prompt = ""
             # Skip empty inputs
             if not user_input:
                 continue
@@ -92,7 +98,7 @@ class LLMChat:
             if user_input == ":model":
                 self.model = self.ui.select_model()
                 try:
-                    self.api_key = self._get_api_key(self.model)
+                    self.api_key = self._get_api_key(self.model.provider)
                 except ValueError as e:
                     error_msg = f"Error: {e!s}\n"
                     sys.stderr.write(error_msg)
@@ -113,6 +119,9 @@ class LLMChat:
                 user_input = user_input[4:]
             elif user_input.startswith(":think"):
                 should_think = True
+            elif user_input.startswith(":v"):
+                recorded_prompt = process_voice_command()
+                continue
             else:
                 try:
                     user_input = parse_insert_commands(user_input)
@@ -125,8 +134,8 @@ class LLMChat:
             self.ui.display_loader()
             try:
                 self.client.get_response(
-                    self.ui.stream_token,
                     user_input,
+                    self.ui.stream_token,
                     chat_id=self.chat_id,
                     should_think=should_think,
                     should_save=should_save,
@@ -141,20 +150,3 @@ class LLMChat:
             self.ui.end_streaming()
 
         return sys.exit(0)
-
-    def _get_api_key(self, model: ModelConfig):
-        api_key = next(
-            (x.api_key for x in config.llm.api_keys if x.provider == model.provider),
-            SecretStr(""),
-        )
-        if not api_key.get_secret_value():
-            api_key = os.getenv(f"{model.provider.upper()}_API_KEY", None)
-            if not api_key:
-                error_msg = (
-                    f"API key for model {model} is not set. Please set it in your "
-                    f"{db.get_config_file()} file or as an env var."
-                )
-                raise ValueError(error_msg)
-            api_key = SecretStr(api_key)
-
-        return api_key

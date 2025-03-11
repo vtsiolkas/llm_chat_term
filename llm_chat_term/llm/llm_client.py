@@ -89,8 +89,8 @@ class LLMClient:
 
     def get_response(
         self,
-        stream_callback: Callable[[str, str], None],
         user_message: str,
+        stream_callback: Callable[[str, str], None],
         *,
         chat_id: str = "",
         should_think: bool = False,
@@ -105,7 +105,7 @@ class LLMClient:
         response = ""
         messages = self.messages[:]
         messages.append(HumanMessage(user_message))
-        for chunk in model.stream(self.messages):
+        for chunk in model.stream(messages):
             text, chunk_type = get_chunk_text_and_type(chunk)
             stream_callback(text, chunk_type)
             response += chunk.text()

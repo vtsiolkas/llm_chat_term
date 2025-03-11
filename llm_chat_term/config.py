@@ -62,6 +62,19 @@ class AppConfig(BaseModel):
     llm: LLMConfig = Field(default_factory=LLMConfig)
     ui: UIConfig = Field(default_factory=UIConfig)
     colors: ColorConfig = Field(default_factory=ColorConfig)
+    audio_device: str = ""
+
+
+def save_config(conf: AppConfig) -> None:
+    """Save the config model to the YAML file."""
+    config_file = get_config_file()
+    conf_dict = conf.model_dump()
+
+    for api_key in conf_dict["llm"]["api_keys"]:
+        api_key["api_key"] = conf_dict["llm"]["api_keys"].get_secret_value()
+
+    with config_file.open("w") as f:
+        yaml.dump(conf, f, default_flow_style=False, sort_keys=False)
 
 
 def load_config() -> AppConfig:
@@ -74,16 +87,7 @@ def load_config() -> AppConfig:
     # Load configuration from file if it exists
     if not config_file.exists():
         try:
-            # Dump the default config model to a dictionary
-            default_config = config.model_dump()
-
-            # Make sure API keys are empty strings, not SecretStr objects
-            for api_key in default_config["llm"]["api_keys"]:
-                api_key["api_key"] = ""
-
-            with config_file.open("w") as f:
-                yaml.dump(default_config, f, default_flow_style=False, sort_keys=False)
-
+            save_config(config)
             sys.stdout.write(f"Created default configuration file at {config_file}\n")
         except Exception as e:
             error_msg = f"Error creating default config file: {e}\n"

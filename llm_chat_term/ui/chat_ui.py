@@ -14,6 +14,7 @@ from rich.syntax import Syntax
 from rich.text import Text
 
 from llm_chat_term.config import config
+from llm_chat_term.ui.audio_device_selector import select_audio_device
 from llm_chat_term.ui.chat_selector import create_new_chat, select_chat
 from llm_chat_term.ui.help import print_help
 from llm_chat_term.ui.model_selector import select_model
@@ -126,19 +127,28 @@ class ChatUI:
     def create_new_chat(self, *, allow_blank: bool = False):
         return create_new_chat(allow_blank=allow_blank)
 
-    def select_chat(self):
+    @staticmethod
+    def select_chat():
         return select_chat()
 
-    def select_model(self):
+    @staticmethod
+    def select_model():
         return select_model()
 
-    def get_user_input(self, model_name: str, chat_id: str) -> str:
+    @staticmethod
+    def select_audio_device(available_devices: dict[str, int]):
+        return select_audio_device(available_devices)
+
+    def get_user_input(
+        self, model_name: str, chat_id: str, *, prefilled_prompt: str = ""
+    ) -> str:
         """Get multiline input from the user."""
         try:
             self.console.print(self._get_user_title(model_name, chat_id))
             user_input = self.session.prompt(
                 config.ui.prompt_symbol,
                 style=self.style,
+                default=prefilled_prompt,
             )
             return user_input.strip()
         except KeyboardInterrupt:
