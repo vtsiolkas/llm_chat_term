@@ -25,15 +25,15 @@ def get_chunk_text_and_type(chunk: BaseMessageChunk) -> tuple[str, str]:
         return chunk.content, "text"
 
     # must be a list, extract the type from the first block
-    content: list[dict[str, str] | str] = chunk.content
+    content: list[dict[str, str] | str] = chunk.content  # pyright: ignore[reportUnknownMemberType]
     first_block = content[0]
     if isinstance(first_block, str):
         chunk_type = "text"
     else:
         chunk_type: str = first_block.get("type", "text")
     return "".join(
-        block if isinstance(block, str) else block.get(chunk_type, "text")
-        for block in chunk.content
+        block if isinstance(block, str) else block.get(chunk_type, "text")  # pyright: ignore[reportUnknownMemberType, reportUnknownArgumentType]
+        for block in chunk.content  # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType]
     ), chunk_type
 
 

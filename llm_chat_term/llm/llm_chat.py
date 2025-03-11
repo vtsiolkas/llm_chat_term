@@ -96,13 +96,14 @@ class LLMChat:
                         )
                 continue
             if user_input == ":model":
-                self.model = self.ui.select_model()
+                model = self.ui.select_model()
                 try:
-                    self.api_key = self._get_api_key(self.model.provider)
+                    self.api_key = utils.get_api_key(model.provider)
                 except ValueError as e:
                     error_msg = f"Error: {e!s}\n"
                     sys.stderr.write(error_msg)
                 else:
+                    self.model = model
                     self.client.configure_model(self.model, self.api_key)
                 continue
             if user_input == ":chat":
