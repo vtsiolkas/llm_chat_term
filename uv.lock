@@ -475,16 +475,13 @@ wheels = [
 
 [[package]]
 name = "llm-chat-term"
-version = "0.2.2"
+version = "0.2.3"
 source = { editable = "." }
 dependencies = [
     { name = "langchain" },
     { name = "langchain-anthropic" },
     { name = "langchain-openai" },
     { name = "prompt-toolkit" },
-    { name = "pyaudio" },
-    { name = "pydub" },
-    { name = "pydub-stubs" },
     { name = "python-dotenv" },
     { name = "pyyaml" },
     { name = "rich" },
@@ -500,6 +497,7 @@ voice = [
 [package.dev-dependencies]
 dev = [
     { name = "pre-commit" },
+    { name = "pydub-stubs" },
     { name = "ruff" },
 ]
 
@@ -509,11 +507,8 @@ requires-dist = [
     { name = "langchain-anthropic", specifier = ">=0.3.8" },
     { name = "langchain-openai", specifier = ">=0.3.7" },
     { name = "prompt-toolkit", specifier = ">=3.0.50" },
-    { name = "pyaudio", specifier = ">=0.2.14" },
-    { name = "pyaudio", marker = "extra == 'voice'" },
-    { name = "pydub", specifier = ">=0.25.1" },
-    { name = "pydub", marker = "extra == 'voice'" },
-    { name = "pydub-stubs", specifier = ">=0.25.1.5" },
+    { name = "pyaudio", marker = "extra == 'voice'", specifier = ">=0.2.14" },
+    { name = "pydub", marker = "extra == 'voice'", specifier = ">=0.25.1" },
     { name = "python-dotenv", specifier = ">=1.0.1" },
     { name = "pyyaml", specifier = ">=6.0.2" },
     { name = "rich", specifier = ">=13.9.4" },
@@ -524,6 +519,7 @@ provides-extras = ["voice"]
 [package.metadata.requires-dev]
 dev = [
     { name = "pre-commit", specifier = ">=4.1.0" },
+    { name = "pydub-stubs", specifier = ">=0.25.1.5" },
     { name = "ruff", specifier = ">=0.9.10" },
 ]
 

@@ -4,7 +4,7 @@ from langchain_core.messages import SystemMessage
 from pydantic import SecretStr
 
 from llm_chat_term import db, utils
-from llm_chat_term.audio.voice_command import process_voice_command
+from llm_chat_term.audio.audio_entrypoint import handle_voice
 from llm_chat_term.config import ModelConfig, config
 from llm_chat_term.llm.insert_commands import parse_insert_commands
 from llm_chat_term.llm.llm_client import LLMClient
@@ -120,7 +120,7 @@ class LLMChat:
             elif user_input.startswith(":think"):
                 should_think = True
             elif user_input.startswith(":v"):
-                recorded_prompt = process_voice_command()
+                recorded_prompt = handle_voice()
                 continue
             else:
                 try:
