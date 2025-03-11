@@ -14,15 +14,15 @@ A python terminal-based chatbot application that integrates with language models
 - Change active model/conversation on the fly
 - Embed files from the filesystem or webpage contents by url in your prompts
 - Quick temporary prompts that don't pollute the current conversation context
-- Optional voice input support
+- Optional voice input support (install llm-chat-term[voice])
 - Configurable via a YAML config file
 
 ## Installation
 
-You can install `llm_chat_term` using [uv](https://github.com/astral-sh/uv) by running:
+You can install `llm-chat-term` using [uv](https://github.com/astral-sh/uv) by running:
 
 ```bash
-uv tool install llm_chat_term
+uv tool install llm-chat-term
 ```
 
 or if you don't have uv installed:

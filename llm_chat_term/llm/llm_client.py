@@ -20,24 +20,25 @@ from pydantic import SecretStr
 
 from llm_chat_term import db
 from llm_chat_term.config import ModelConfig, config
-from llm_chat_term.llm.tools import process_tool_request, tools
+from llm_chat_term.llm.tools.definitions import tools
+from llm_chat_term.llm.tools.main import process_tool_request
 
 
 def get_chunk_text_and_type(chunk: BaseMessageChunk) -> tuple[str, str]:
     """Get the text content and type of the message."""
-    if isinstance(chunk.content, str):  # pyright: ignore[reportUnknownMemberType]
+    if isinstance(chunk.content, str):
         return chunk.content, "text"
 
     # must be a list, extract the type from the first block
-    content: list[dict[str, str] | str] = chunk.content  # pyright: ignore[reportUnknownMemberType]
+    content: list[dict[str, str] | str] = chunk.content
     first_block = content[0]
     if isinstance(first_block, str):
         chunk_type = "text"
     else:
         chunk_type: str = first_block.get("type", "text")
     return "".join(
-        block if isinstance(block, str) else block.get(chunk_type, "")  # pyright: ignore[reportUnknownMemberType, reportUnknownArgumentType]
-        for block in chunk.content  # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType]
+        block if isinstance(block, str) else block.get(chunk_type, "")
+        for block in chunk.content  # pyright: ignore[reportUnknownVariableType]
     ), chunk_type
 
 
@@ -65,7 +66,7 @@ class LLMClient:
                 stream_usage=False,
                 streaming=True,
             )
-            self.model = self.model.bind_tools(tools)  # pyright: ignore[reportUnknownMemberType]
+            self.model = self.model.bind_tools(tools)
             self.thinking_model = ChatAnthropic(  # pyright: ignore[reportCallIssue]
                 api_key=api_key,
                 model=model_config.name,  # pyright: ignore[reportCallIssue]
@@ -83,7 +84,7 @@ class LLMClient:
                 max_tokens=16384,  # pyright: ignore[reportCallIssue]
                 streaming=True,
             )
-            self.model = self.model.bind_tools(tools)  # pyright: ignore[reportUnknownMemberType]
+            self.model = self.model.bind_tools(tools)
             self.thinking_model = self.model
 
     def add_user_message(self, content: str) -> None:
@@ -139,8 +140,10 @@ class LLMClient:
                 text, chunk_type = get_chunk_text_and_type(chunk)
                 stream_callback(text, chunk_type)
                 response += chunk.text()
-        if is_tool and tool_message:
-            stream_callback(f"Calling tool {tool_name}\n", "text")
+        if is_tool and tool_message and tool_call_id:
+            stream_callback(
+                (f"\n\n-- Calling tool {tool_name} with {tool_json}\n\n"), "text"
+            )
             tool_result = process_tool_request(tool_name, json.loads(tool_json))
             ai_tool_message = message_chunk_to_message(tool_message)
             self.messages.append(ai_tool_message)
