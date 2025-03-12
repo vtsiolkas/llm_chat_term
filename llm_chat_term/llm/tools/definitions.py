@@ -8,7 +8,7 @@ class GetWeather(BaseModel):
 
 
 class CatFileCommand(BaseModel):
-    """Execute a cat command with arbitrary arguments
+    """Execute the `cat` command with arbitrary arguments
     Returns the return code, stdout, and stderr of the command
     Example:
     To execute `cat file.txt` call this tool with {"arguments": "file.txt"}
@@ -18,8 +18,9 @@ class CatFileCommand(BaseModel):
 
 
 class GitCommand(BaseModel):
-    """Execute a git command with arbitrary arguments
+    """Execute the `git` command with arbitrary arguments
     Returns the return code, stdout, and stderr of the command
+    If some action is destructive, don't execute it.
     Example:
     To execute `git status -s` call this tool with {"arguments": "status -s"}
     """
