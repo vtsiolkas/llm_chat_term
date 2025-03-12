@@ -115,6 +115,14 @@ class LLMChat:
                 self.client.parse_messages(self.chat_id)
                 self.ui.render_conversation(self.client.messages, self.chat_id)
                 continue
+            if user_input == ":agent on":
+                self.client.agent_mode = True
+                self.ui.console.print("Agent mode enabled", style="bold green")
+                continue
+            if user_input == ":agent off":
+                self.client.agent_mode = False
+                self.ui.console.print("Agent mode disabled", style="bold orchid")
+                continue
             if user_input.startswith(":tmp"):
                 should_save = False
                 user_input = user_input[4:]

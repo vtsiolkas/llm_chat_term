@@ -13,6 +13,7 @@ from langchain_core.messages import (
     HumanMessage,
     SystemMessage,
     ToolMessage,
+    ToolMessageChunk,
     message_chunk_to_message,
 )
 from langchain_openai import ChatOpenAI
@@ -46,6 +47,8 @@ def get_chunk_text_and_type(chunk: BaseMessageChunk) -> tuple[str, str]:
 class LLMClient:
     """Client for interacting with the LLM."""
 
+    agent_mode = True
+
     def __init__(self, model: ModelConfig, api_key: SecretStr):
         """Initialize the LLM client with the configured model."""
         self.messages: list[BaseMessage] = []
@@ -67,7 +70,6 @@ class LLMClient:
                 stream_usage=False,
                 streaming=True,
             )
-            self.model = self.model.bind_tools(tools)
             self.thinking_model = ChatAnthropic(  # pyright: ignore[reportCallIssue]
                 api_key=api_key,
                 model=model_config.name,  # pyright: ignore[reportCallIssue]
@@ -85,7 +87,6 @@ class LLMClient:
                 max_tokens=16384,  # pyright: ignore[reportCallIssue]
                 streaming=True,
             )
-            self.model = self.model.bind_tools(tools)
             self.thinking_model = self.model
 
     def add_user_message(self, content: str) -> None:
@@ -108,7 +109,10 @@ class LLMClient:
         # but we only send it for the current response
     ) -> None:
         """Get a response from the LLM and stream it through the callback."""
-        model = self.thinking_model if should_think else self.model
+        if self.agent_mode:
+            model = self.model.bind_tools(tools)
+        else:
+            model = self.thinking_model if should_think else self.model
         model = cast(BaseChatModel, model)
 
         response = ""
@@ -119,22 +123,25 @@ class LLMClient:
         tool_json = ""
         tool_name = ""
         tool_call_id = ""
-        tool_message: BaseMessageChunk | None = None
+        tool_message: ToolMessageChunk | None = None
+        # TODO: o3-mini doesn't know what to do with response ToolMessage
+        # Ditch langchain
         for chunk in model.stream(messages):
             if (
-                isinstance(chunk.content, list)
-                and len(chunk.content) >= 0
-                and isinstance(chunk.content[0], dict)
-                and chunk.content[0].get("type") == "tool_use"
+                hasattr(chunk, "tool_call_chunks")
+                and isinstance(chunk.tool_call_chunks, list)
+                and len(chunk.tool_call_chunks) > 0
+                and isinstance(chunk.tool_call_chunks[0], dict)
             ):
-                block = cast(dict[str, str], chunk.content[0])
+                chunk = cast(ToolMessageChunk, chunk)
+                block = cast(dict[str, str], chunk.tool_call_chunks[0])
                 if not is_tool:
                     is_tool = True
                     tool_name = block["name"]
                     tool_call_id = block["id"]
                     tool_message = chunk
                 else:
-                    tool_json += block["partial_json"]
+                    tool_json += block["args"]
                     if tool_message:
                         tool_message = tool_message + chunk
             else:
@@ -148,10 +155,14 @@ class LLMClient:
             confirm = ChatUI.display_prompt(f"Use tool {tool_name} with {tool_json}:")
             if confirm:
                 stream_callback(
-                    (f"\n\n***-- Calling tool {tool_name} with {tool_json}***\n\n"),
+                    (f"\n\n*-- Calling tool {tool_name} with {tool_json}...*\n"),
                     "text",
                 )
                 tool_result = process_tool_request(tool_name, json.loads(tool_json))
+                stream_callback(
+                    f"{'**success**' if tool_result['success'] else '**failure**'}\n\n",
+                    "text",
+                )
                 self.messages.append(ai_tool_message)
                 self.messages.append(
                     ToolMessage(tool_result, tool_call_id=tool_call_id)

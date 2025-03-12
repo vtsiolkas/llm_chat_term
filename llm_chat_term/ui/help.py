@@ -21,6 +21,10 @@ COMMANDS: dict[str, list[str]] = {
     ":model": [
         "Display a menu to select a different chat."
     ],
+    ":agent {on|off}": [
+        "Enables/disables agent mode. Agent mode has access to tools that can",
+        "affect your filesystem, use git etc.",
+    ],
     ":redraw": [
         "Redraw the whole conversation."
     ],
