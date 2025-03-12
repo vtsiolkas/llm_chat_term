@@ -16,6 +16,7 @@ from rich.text import Text
 from llm_chat_term.config import config
 from llm_chat_term.ui.audio_device_selector import select_audio_device
 from llm_chat_term.ui.chat_selector import create_new_chat, select_chat
+from llm_chat_term.ui.confirm_prompt import confirm_prompt
 from llm_chat_term.ui.help import print_help
 from llm_chat_term.ui.model_selector import select_model
 
@@ -124,7 +125,11 @@ class ChatUI:
         else:
             self.console.print("Anonymous chat", style=f"bold {config.colors.system}")
 
-    def create_new_chat(self, *, allow_blank: bool = False):
+    def display_loader(self):
+        self.console.print("[yellow]Contemplating...[/yellow]")
+
+    @staticmethod
+    def create_new_chat(*, allow_blank: bool = False):
         return create_new_chat(allow_blank=allow_blank)
 
     @staticmethod
@@ -138,6 +143,10 @@ class ChatUI:
     @staticmethod
     def select_audio_device(available_devices: dict[str, int]):
         return select_audio_device(available_devices)
+
+    @staticmethod
+    def display_prompt(question: str) -> bool:
+        return confirm_prompt(question)
 
     def get_user_input(
         self, model_name: str, chat_id: str, *, prefilled_prompt: str = ""
@@ -191,9 +200,6 @@ class ChatUI:
         content = Group(self._get_ai_title(), text)
         self.live.update(content, refresh=True)
 
-    def display_loader(self):
-        self.console.print("[yellow]Contemplating...[/yellow]")
-
     def stream_token(self, token: str, chunk_type: str):
         """Display a streaming token from the assistant."""
         if not self.streaming:
@@ -203,10 +209,13 @@ class ChatUI:
         if chunk_type == "thinking" and not self.thinking:
             self.thinking = True
             self.current_response += "\\<think>\n"
-        if chunk_type == "text" and self.thinking:
+        elif chunk_type == "text" and self.thinking:
             # Here starts the actual response, clear the thinking part
             self.thinking = False
             self.current_response = ""
+        elif chunk_type == "prompt_tool" and self.streaming:
+            self.live.stop()
+            self.streaming = False
 
         self.current_response += token
         self._update_live()

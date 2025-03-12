@@ -21,7 +21,8 @@ from pydantic import SecretStr
 from llm_chat_term import db
 from llm_chat_term.config import ModelConfig, config
 from llm_chat_term.llm.tools.definitions import tools
-from llm_chat_term.llm.tools.main import process_tool_request
+from llm_chat_term.llm.tools.main import TOOL_REFUSAL, process_tool_request
+from llm_chat_term.ui.chat_ui import ChatUI
 
 
 def get_chunk_text_and_type(chunk: BaseMessageChunk) -> tuple[str, str]:
@@ -141,16 +142,29 @@ class LLMClient:
                 stream_callback(text, chunk_type)
                 response += chunk.text()
         if is_tool and tool_message and tool_call_id:
-            stream_callback(
-                (f"\n\n-- Calling tool {tool_name} with {tool_json}\n\n"), "text"
-            )
-            tool_result = process_tool_request(tool_name, json.loads(tool_json))
             ai_tool_message = message_chunk_to_message(tool_message)
-            self.messages.append(ai_tool_message)
-            self.messages.append(ToolMessage(tool_result, tool_call_id=tool_call_id))
-            self.get_response(
-                "", stream_callback, chat_id=chat_id, should_save=should_save
-            )
+            # Pause streaming to display the confirm prompt
+            stream_callback("", "prompt_tool")
+            confirm = ChatUI.display_prompt(f"Use tool {tool_name} with {tool_json}:")
+            if confirm:
+                stream_callback(
+                    (f"\n\n***-- Calling tool {tool_name} with {tool_json}***\n\n"),
+                    "text",
+                )
+                tool_result = process_tool_request(tool_name, json.loads(tool_json))
+                self.messages.append(ai_tool_message)
+                self.messages.append(
+                    ToolMessage(tool_result, tool_call_id=tool_call_id)
+                )
+                self.get_response(
+                    "", stream_callback, chat_id=chat_id, should_save=should_save
+                )
+            else:
+                stream_callback((f"\n\n-- Will not call tool {tool_name}.\n\n"), "text")
+                self.messages.append(ai_tool_message)
+                self.messages.append(
+                    ToolMessage(TOOL_REFUSAL, tool_call_id=tool_call_id)
+                )
 
         if should_save:
             self.messages = messages

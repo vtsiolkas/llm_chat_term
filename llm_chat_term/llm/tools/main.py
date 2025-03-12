@@ -1,7 +1,10 @@
+import json
 from collections.abc import Callable
 from typing import Any, TypeVar
 
 from pydantic import BaseModel
+
+TOOL_REFUSAL = json.dumps({"success": False, "reason": "User refused to allow tool"})
 
 # Type variables for type safety
 T = TypeVar("T", bound=BaseModel)
