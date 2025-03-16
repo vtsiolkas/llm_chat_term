@@ -54,7 +54,6 @@ class LLMChat:
 
     def start_chat(self):
         should_think = False
-        should_save = True
         recorded_prompt: str = ""
 
         while True:
@@ -123,10 +122,7 @@ class LLMChat:
                 self.client.agent_mode = False
                 self.ui.console.print("Agent mode disabled", style="bold orchid")
                 continue
-            if user_input.startswith(":tmp"):
-                should_save = False
-                user_input = user_input[4:]
-            elif user_input.startswith(":think"):
+            if user_input.startswith(":think"):
                 should_think = True
             elif user_input.startswith(":v"):
                 recorded_prompt = handle_voice()
@@ -147,13 +143,11 @@ class LLMChat:
                     self.ui.stream_token,
                     chat_id=self.chat_id,
                     should_think=should_think,
-                    should_save=should_save,
                 )
             except Exception as e:
                 error_msg = f"Something went wrong... {e!s}\n"
                 sys.stderr.write(error_msg)
             should_think = False
-            should_save = True
 
             # End streaming
             self.ui.end_streaming()

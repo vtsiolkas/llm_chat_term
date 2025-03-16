@@ -104,7 +104,6 @@ class LLMClient:
         *,
         chat_id: str = "",
         should_think: bool = False,
-        should_save: bool = False,
         # For :tmp handling, we don't append user message to conversation history
         # but we only send it for the current response
     ) -> None:
@@ -112,21 +111,21 @@ class LLMClient:
         if self.agent_mode:
             model = self.model.bind_tools(tools)
         else:
+            # Thinking model only for claude, o3-mini always thinks, 4o never
             model = self.thinking_model if should_think else self.model
         model = cast(BaseChatModel, model)
 
         response = ""
-        messages = self.messages[:]
         if user_message:
-            messages.append(HumanMessage(user_message))
+            self.messages.append(HumanMessage(user_message))
         is_tool = False
         tool_json = ""
         tool_name = ""
         tool_call_id = ""
-        tool_message: ToolMessageChunk | None = None
+        tool_message: BaseMessageChunk | None = None
         # TODO: o3-mini doesn't know what to do with response ToolMessage
         # Ditch langchain
-        for chunk in model.stream(messages):
+        for chunk in model.stream(self.messages):
             if (
                 hasattr(chunk, "tool_call_chunks")
                 and isinstance(chunk.tool_call_chunks, list)
@@ -165,11 +164,9 @@ class LLMClient:
                 )
                 self.messages.append(ai_tool_message)
                 self.messages.append(
-                    ToolMessage(tool_result, tool_call_id=tool_call_id)
+                    ToolMessage(json.dumps(tool_result), tool_call_id=tool_call_id)
                 )
-                self.get_response(
-                    "", stream_callback, chat_id=chat_id, should_save=should_save
-                )
+                self.get_response("", stream_callback, chat_id=chat_id)
             else:
                 stream_callback((f"\n\n-- Will not call tool {tool_name}.\n\n"), "text")
                 self.messages.append(ai_tool_message)
@@ -177,11 +174,9 @@ class LLMClient:
                     ToolMessage(TOOL_REFUSAL, tool_call_id=tool_call_id)
                 )
 
-        if should_save:
-            self.messages = messages
-            self.messages.append(AIMessage(response))
-            if chat_id:
-                db.save_chat_history(chat_id, self.get_conversation_history())
+        self.messages.append(AIMessage(response))
+        if chat_id:
+            db.save_chat_history(chat_id, self.get_conversation_history())
 
     def parse_messages(self, chat_id: str):
         messages_dict = db.load_chat_history(chat_id)
