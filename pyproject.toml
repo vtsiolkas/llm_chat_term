@@ -45,14 +45,16 @@ llm_chat_term = "llm_chat_term.app:main"
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
-[tool.basedpyright]
+[tool.pyright]
+reportUnknownArgumentType = false
+reportUnknownMemberType = false
 reportUnusedCallResult = false
 reportUnannotatedClassAttribute = false
 reportAny = false
 reportExplicitAny = false
 
 [tool.ruff.lint]
-# Enable a large set of common rules
+# Enable all rules, and disable per-case
 select = ["ALL"]
 ignore = [
     "D",

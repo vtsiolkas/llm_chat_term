@@ -21,12 +21,12 @@ COMMANDS: dict[str, list[str]] = {
     ":model": [
         "Display a menu to select a different chat."
     ],
+    ":agent {on|off}": [
+        "Enables/disables agent mode. Agent mode has access to tools that can",
+        "affect your filesystem, use git etc.",
+    ],
     ":redraw": [
         "Redraw the whole conversation."
-    ],
-    ":tmp {prompt}": [
-        "This prompt won't be saved to the conversation history.",
-        "Ideal for quick one-off questions in the middle of a large conversation",
     ],
     ":think {prompt}": [
         "Enable thinking mode only for this question (Claude only)."
