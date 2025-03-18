@@ -47,7 +47,7 @@ def get_chunk_text_and_type(chunk: BaseMessageChunk) -> tuple[str, str]:
 class LLMClient:
     """Client for interacting with the LLM."""
 
-    agent_mode = True
+    agent_mode = False
 
     def __init__(self, model: ModelConfig, api_key: SecretStr):
         """Initialize the LLM client with the configured model."""
