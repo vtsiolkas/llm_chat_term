@@ -4,3 +4,7 @@ class FileReadError(Exception):
 
 class UrlReadError(Exception):
     pass
+
+
+class ConfigurationError(Exception):
+    pass

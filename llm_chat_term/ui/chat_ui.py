@@ -14,6 +14,7 @@ from rich.syntax import Syntax
 from rich.text import Text
 
 from llm_chat_term.config import config
+from llm_chat_term.llm.models import ModelConfig
 from llm_chat_term.ui.audio_device_selector import select_audio_device
 from llm_chat_term.ui.chat_selector import create_new_chat, select_chat
 from llm_chat_term.ui.confirm_prompt import confirm_prompt
@@ -137,7 +138,7 @@ class ChatUI:
         return select_chat()
 
     @staticmethod
-    def select_model():
+    def select_model() -> ModelConfig:
         return select_model()
 
     @staticmethod

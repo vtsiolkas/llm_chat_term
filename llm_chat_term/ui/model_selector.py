@@ -1,9 +1,9 @@
-from llm_chat_term.config import ModelConfig, config
+from llm_chat_term.llm.models import ModelConfig, get_models
 from llm_chat_term.ui.prompt_menu import Menu
 
 
 def select_model() -> ModelConfig:
-    models = config.llm.models
+    models = get_models()
 
     menu = Menu(
         [model.name for model in models],

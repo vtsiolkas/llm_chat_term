@@ -8,34 +8,20 @@ from pydantic import BaseModel, Field, SecretStr
 from llm_chat_term.db import get_config_file
 
 
-class ModelConfig(BaseModel):
-    provider: str
-    name: str
-    temperature: float | None = None
-
-
-def get_default_models():
-    return [
-        ModelConfig(
-            provider="anthropic",
-            name="claude-3-7-sonnet-20250219",
-        ),
-        ModelConfig(provider="openai", name="gpt-4o"),
-        ModelConfig(provider="openai", name="o3-mini"),
-    ]
-
-
 class ApiKey(BaseModel):
     provider: str
     api_key: SecretStr = Field(default=SecretStr(""))
 
 
 def get_default_api_keys() -> list[ApiKey]:
-    return [ApiKey(provider="anthropic"), ApiKey(provider="openai")]
+    return [
+        ApiKey(provider="anthropic"),
+        ApiKey(provider="openai"),
+        ApiKey(provider="deepseek"),
+    ]
 
 
 class LLMConfig(BaseModel):
-    models: list[ModelConfig] = Field(default_factory=get_default_models)
     api_keys: list[ApiKey] = Field(default_factory=get_default_api_keys)
     system_prompt: str = (
         "You are a helpful assistant responding to a user's questions in a PC terminal application.\n"

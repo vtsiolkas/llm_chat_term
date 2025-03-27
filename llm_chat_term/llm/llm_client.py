@@ -16,11 +16,14 @@ from langchain_core.messages import (
     ToolMessageChunk,
     message_chunk_to_message,
 )
+from langchain_deepseek import ChatDeepSeek
 from langchain_openai import ChatOpenAI
 from pydantic import SecretStr
 
 from llm_chat_term import db
-from llm_chat_term.config import ModelConfig, config
+from llm_chat_term.config import config
+from llm_chat_term.exceptions import ConfigurationError
+from llm_chat_term.llm.models import ModelConfig
 from llm_chat_term.llm.tools.definitions import tools
 from llm_chat_term.llm.tools.main import TOOL_REFUSAL, process_tool_request
 from llm_chat_term.ui.chat_ui import ChatUI
@@ -58,9 +61,10 @@ class LLMClient:
         self.model_config = model_config
         if model_config.provider == "openai" and model_config.name.startswith("o"):
             temperature = 1.0
+        elif model_config.provider == "deepseek":
+            temperature = 0.0
         else:
-            temperature = model_config.temperature or 0.4
-        temperature = 1.0
+            temperature = 0.4
         if model_config.provider == "anthropic":
             self.model = ChatAnthropic(  # pyright: ignore[reportCallIssue]
                 api_key=api_key,
@@ -88,6 +92,18 @@ class LLMClient:
                 streaming=True,
             )
             self.thinking_model = self.model
+        elif model_config.provider == "deepseek":
+            self.model = ChatDeepSeek(
+                api_key=api_key,
+                model=model_config.name,
+                temperature=temperature,
+                max_tokens=8192,
+                streaming=True,
+            )
+            self.thinking_model = self.model
+        else:
+            msg = "Unknown model provider"
+            raise ConfigurationError(msg)
 
     def add_user_message(self, content: str) -> None:
         """Add a user message to the conversation history."""

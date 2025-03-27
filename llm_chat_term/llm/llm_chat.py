@@ -5,9 +5,10 @@ from pydantic import SecretStr
 
 from llm_chat_term import db, utils
 from llm_chat_term.audio.audio_entrypoint import handle_voice
-from llm_chat_term.config import ModelConfig, config
+from llm_chat_term.config import config
 from llm_chat_term.llm.insert_commands import parse_insert_commands
 from llm_chat_term.llm.llm_client import LLMClient
+from llm_chat_term.llm.models import ModelConfig, get_models
 from llm_chat_term.ui.chat_ui import ChatUI
 
 
@@ -17,7 +18,7 @@ class LLMChat:
         available_model: ModelConfig | None = None
 
         self.api_key = SecretStr("")
-        for model in config.llm.models:
+        for model in get_models():
             try:
                 self.api_key = utils.get_api_key(model.provider)
             except ValueError:
