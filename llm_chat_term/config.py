@@ -18,6 +18,7 @@ def get_default_api_keys() -> list[ApiKey]:
         ApiKey(provider="anthropic"),
         ApiKey(provider="openai"),
         ApiKey(provider="deepseek"),
+        ApiKey(provider="google"),
     ]
 
 

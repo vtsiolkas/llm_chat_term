@@ -17,6 +17,7 @@ from langchain_core.messages import (
     message_chunk_to_message,
 )
 from langchain_deepseek import ChatDeepSeek
+from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_openai import ChatOpenAI
 from pydantic import SecretStr
 
@@ -94,6 +95,15 @@ class LLMClient:
             self.thinking_model = self.model
         elif model_config.provider == "deepseek":
             self.model = ChatDeepSeek(
+                api_key=api_key,
+                model=model_config.name,
+                temperature=temperature,
+                max_tokens=8192,
+                streaming=True,
+            )
+            self.thinking_model = self.model
+        elif model_config.provider == "google":
+            self.model = ChatGoogleGenerativeAI(
                 api_key=api_key,
                 model=model_config.name,
                 temperature=temperature,
