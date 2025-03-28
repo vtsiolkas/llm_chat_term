@@ -118,13 +118,18 @@ class ChatUI:
     def display_help(self):
         print_help(self.console)
 
-    def display_info(self, chat_id: str):
+    def display_info(self, chat_id: str, model: str, agent_mode: bool):  # noqa: FBT001
         if chat_id:
             self.console.print(
                 f"Selected chat: {chat_id}", style=f"bold {config.colors.system}"
             )
         else:
             self.console.print("Anonymous chat", style=f"bold {config.colors.system}")
+        self.console.print(f"Model: {model}", style=f"bold {config.colors.system}")
+        self.console.print(
+            f"Agent mode: {'on' if agent_mode else 'off'}",
+            style=f"bold {config.colors.system}",
+        )
 
     def display_loader(self):
         self.console.print("[yellow]Contemplating...[/yellow]")
@@ -182,7 +187,7 @@ class ChatUI:
 
         self.console.print(rule)
         for message in messages:
-            message.content = cast(str, message.content)
+            message.content = cast("str", message.content)
             if isinstance(message, HumanMessage):
                 self.console.print(self._get_user_title())
                 self.console.print(

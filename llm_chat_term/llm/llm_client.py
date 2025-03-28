@@ -2,10 +2,9 @@
 
 import json
 from collections.abc import Callable
-from typing import cast
+from typing import TYPE_CHECKING, cast
 
 from langchain_anthropic import ChatAnthropic
-from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import (
     AIMessage,
     BaseMessage,
@@ -28,6 +27,9 @@ from llm_chat_term.llm.models import ModelConfig
 from llm_chat_term.llm.tools.definitions import tools
 from llm_chat_term.llm.tools.main import TOOL_REFUSAL, process_tool_request
 from llm_chat_term.ui.chat_ui import ChatUI
+
+if TYPE_CHECKING:
+    from langchain_core.language_models import BaseChatModel
 
 
 def get_chunk_text_and_type(chunk: BaseMessageChunk) -> tuple[str, str]:
@@ -139,7 +141,7 @@ class LLMClient:
         else:
             # Thinking model only for claude, o3-mini always thinks, 4o never
             model = self.thinking_model if should_think else self.model
-        model = cast(BaseChatModel, model)
+        model = cast("BaseChatModel", model)
 
         response = ""
         if user_message:
@@ -158,8 +160,8 @@ class LLMClient:
                 and len(chunk.tool_call_chunks) > 0
                 and isinstance(chunk.tool_call_chunks[0], dict)
             ):
-                chunk = cast(ToolMessageChunk, chunk)
-                block = cast(dict[str, str], chunk.tool_call_chunks[0])
+                chunk = cast("ToolMessageChunk", chunk)
+                block = cast("dict[str, str]", chunk.tool_call_chunks[0])
                 if not is_tool:
                     is_tool = True
                     tool_name = block["name"]
@@ -233,7 +235,7 @@ class LLMClient:
             else:
                 continue
 
-            message.content = cast(str, message.content)
+            message.content = cast("str", message.content)
             history.append(
                 {
                     "role": role,

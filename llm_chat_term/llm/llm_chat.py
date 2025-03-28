@@ -74,7 +74,9 @@ class LLMChat:
                 self.ui.display_help()
                 continue
             if user_input == ":info":
-                self.ui.display_info(self.chat_id)
+                self.ui.display_info(
+                    self.chat_id, self.model.name, self.client.agent_mode
+                )
                 continue
             if user_input in [":edit", ":e"]:
                 if self.chat_id:
@@ -112,7 +114,6 @@ class LLMChat:
                 self.ui.render_conversation(self.client.messages, self.chat_id)
                 continue
             if user_input == ":redraw":
-                self.client.parse_messages(self.chat_id)
                 self.ui.render_conversation(self.client.messages, self.chat_id)
                 continue
             if user_input == ":agent on":
