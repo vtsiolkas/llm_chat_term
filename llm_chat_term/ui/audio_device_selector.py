@@ -11,10 +11,8 @@ def select_audio_device(audio_devices: dict[str, int]) -> str:
     options = list(audio_devices)
     menu = Menu(
         options,
-        (
-            " Select an audio device to record from "
-            "(j/k to move, Enter to select, e to edit, d to delete, q to quit):\n"
-        ),
+        (" Select an audio device to record from (j/k to move, Enter to select):\n"),
+        can_quit=False,
     )
 
     result = menu.run()

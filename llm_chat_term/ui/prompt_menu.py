@@ -7,9 +7,10 @@ from prompt_toolkit.layout import FormattedTextControl, HSplit, Layout, Window
 
 
 class Menu:
-    def __init__(self, items: list[str], title: str):
+    def __init__(self, items: list[str], title: str, *, can_quit: bool = True):
         self.items = items
         self.title = title
+        self.can_quit = can_quit
         self.selected_index = 0
         self.result = 0
         self.kb = KeyBindings()
@@ -36,6 +37,8 @@ class Menu:
         @self.kb.add("q")
         @self.kb.add("c-c")
         def _(event: KeyPressEvent):
+            if not self.can_quit:
+                return
             event.app.exit()
             sys.exit(1)
 
