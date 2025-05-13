@@ -64,7 +64,7 @@ class ChatUI:
         # Track whether we're in a thinking block
         self.thinking = False
         self.current_response = ""
-        self.live = Live()
+        self.live = Live(refresh_per_second=10.0)
 
     def _get_ai_title(self):
         content = Text(
