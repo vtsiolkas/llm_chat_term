@@ -109,8 +109,7 @@ class LLMClient:
                 api_key=api_key,
                 model=model_config.name,
                 temperature=temperature,
-                max_tokens=8192,
-                streaming=True,
+                max_tokens=16384,
             )
             self.thinking_model = self.model
         else:
