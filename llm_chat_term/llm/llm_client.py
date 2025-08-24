@@ -62,7 +62,7 @@ class LLMClient:
 
     def configure_model(self, model_config: ModelConfig, api_key: SecretStr) -> None:
         self.model_config = model_config
-        if model_config.provider == "openai" and model_config.name.startswith("o"):
+        if model_config.provider == "openai":
             temperature = 1.0
         elif model_config.provider == "deepseek":
             temperature = 0.0
