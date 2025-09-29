@@ -15,6 +15,6 @@ def get_models():
         ModelConfig(provider="openai", name="gpt-5"),
         ModelConfig(
             provider="anthropic",
-            name="claude-sonnet-4-20250514",
+            name="claude-sonnet-4-5-20250929",
         ),
     ]

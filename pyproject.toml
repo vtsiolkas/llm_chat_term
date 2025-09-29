@@ -1,6 +1,6 @@
 [project]
 name = "llm_chat_term"
-version = "0.2.11"
+version = "0.2.12"
 description = "Chat with LLMs from the terminal"
 authors = [
     {name = "Vasilis Tsiolkas", email = "tsiolkas@gmail.com"}
