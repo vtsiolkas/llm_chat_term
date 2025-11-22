@@ -1,51 +1,82 @@
+[build-system]
+build-backend = "hatchling.build"
+requires = [ "hatchling" ]
+
 [project]
-name = "llm_chat_term"
-version = "0.2.12"
+name = "llm-chat-term"
+version = "0.2.13"
 description = "Chat with LLMs from the terminal"
-authors = [
-    {name = "Vasilis Tsiolkas", email = "tsiolkas@gmail.com"}
-]
 readme = "README.md"
-license = {text = "MIT"}
-classifiers = [
-    "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: MIT License",
-    "Operating System :: OS Independent",
-    "Development Status :: 4 - Beta",
-    "Environment :: Console",
-    "Topic :: Utilities",
+license = { text = "MIT" }
+authors = [
+  { name = "Vasilis Tsiolkas", email = "tsiolkas@gmail.com" },
 ]
 requires-python = ">=3.12"
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Environment :: Console",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+  "Topic :: Utilities",
+]
 dependencies = [
-    "langchain>=0.3.19",
-    "langchain-anthropic>=0.3.8",
-    "langchain-deepseek>=0.1.3",
-    "langchain-google-genai>=2.1.2",
-    "langchain-openai>=0.3.7",
-    "prompt-toolkit>=3.0.50",
-    "python-dotenv>=1.0.1",
-    "pyyaml>=6.0.2",
-    "rich>=13.9.4",
-    "trafilatura>=2.0.0",
+  "langchain>=0.3.19",
+  "langchain-anthropic>=0.3.8",
+  "langchain-deepseek>=0.1.3",
+  "langchain-google-genai>=2.1.2",
+  "langchain-openai>=0.3.7",
+  "prompt-toolkit>=3.0.50",
+  "python-dotenv>=1.0.1",
+  "pyyaml>=6.0.2",
+  "rich>=13.9.4",
+  "trafilatura>=2",
 ]
 
-[project.optional-dependencies]
-voice = [
-    "llm-chat-term",
-    "pyaudio>=0.2.14",
-    "pydub>=0.25.1",
+optional-dependencies.voice = [
+  "llm-chat-term",
+  "pyaudio>=0.2.14",
+  "pydub>=0.25.1",
+]
+urls."Bug Tracker" = "https://github.com/vtsiolkas/llm_chat_term/issues"
+urls."Homepage" = "https://github.com/vtsiolkas/llm_chat_term"
+scripts.llm_chat_term = "llm_chat_term.app:main"
+
+[dependency-groups]
+dev = [
+  "debugpy>=1.8.13",
+  "pre-commit>=4.1",
+  "pydub-stubs>=0.25.1.5",
+  "ruff>=0.9.10",
 ]
 
-[project.urls]
-"Homepage" = "https://github.com/vtsiolkas/llm_chat_term"
-"Bug Tracker" = "https://github.com/vtsiolkas/llm_chat_term/issues"
+[tool.uv.sources]
+llm-chat-term = { workspace = true }
 
-[project.scripts]
-llm_chat_term = "llm_chat_term.app:main"
-
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
+[tool.ruff]
+# Enable all rules, and disable per-case
+lint.select = [ "ALL" ]
+lint.ignore = [
+  "ANN",
+  "ARG005",
+  "BLE001",
+  "C901",
+  "COM812",
+  "D",
+  "E501",
+  "FIX002",
+  "PLR0912",
+  "PLR0915",
+  "S112",
+  "TD002",
+  "TD003",
+  "TRY003",
+  "TRY301",
+  "UP034",
+]
 
 [tool.pyright]
 reportUnknownArgumentType = false
@@ -54,37 +85,3 @@ reportUnusedCallResult = false
 reportUnannotatedClassAttribute = false
 reportAny = false
 reportExplicitAny = false
-
-[tool.ruff.lint]
-# Enable all rules, and disable per-case
-select = ["ALL"]
-ignore = [
-    "D",
-    "ANN",
-    "BLE001",
-    "TRY003",
-    "TRY301",
-    "COM812",
-    "E501",
-    "BLE001",
-    "S112",
-    "ARG005",
-    "UP034",
-    "C901",
-    "TD002",
-    "TD003",
-    "FIX002",
-    "PLR0912",
-    "PLR0915"
-]
-
-[tool.uv.sources]
-llm-chat-term = { workspace = true }
-
-[dependency-groups]
-dev = [
-    "pre-commit>=4.1.0",
-    "ruff>=0.9.10",
-    "pydub-stubs>=0.25.1.5",
-    "debugpy>=1.8.13",
-]

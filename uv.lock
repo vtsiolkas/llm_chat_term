@@ -701,7 +701,7 @@ wheels = [
 
 [[package]]
 name = "llm-chat-term"
-version = "0.2.12"
+version = "0.2.13"
 source = { editable = "." }
 dependencies = [
     { name = "langchain" },
@@ -744,14 +744,14 @@ requires-dist = [
     { name = "python-dotenv", specifier = ">=1.0.1" },
     { name = "pyyaml", specifier = ">=6.0.2" },
     { name = "rich", specifier = ">=13.9.4" },
-    { name = "trafilatura", specifier = ">=2.0.0" },
+    { name = "trafilatura", specifier = ">=2" },
 ]
 provides-extras = ["voice"]
 
 [package.metadata.requires-dev]
 dev = [
     { name = "debugpy", specifier = ">=1.8.13" },
-    { name = "pre-commit", specifier = ">=4.1.0" },
+    { name = "pre-commit", specifier = ">=4.1" },
     { name = "pydub-stubs", specifier = ">=0.25.1.5" },
     { name = "ruff", specifier = ">=0.9.10" },
 ]
