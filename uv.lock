@@ -701,7 +701,7 @@ wheels = [
 
 [[package]]
 name = "llm-chat-term"
-version = "0.2.13"
+version = "0.2.14"
 source = { editable = "." }
 dependencies = [
     { name = "langchain" },
