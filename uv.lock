@@ -732,19 +732,19 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "langchain", specifier = ">=0.3.19" },
-    { name = "langchain-anthropic", specifier = ">=0.3.8" },
-    { name = "langchain-deepseek", specifier = ">=0.1.3" },
-    { name = "langchain-google-genai", specifier = ">=2.1.2" },
-    { name = "langchain-openai", specifier = ">=0.3.7" },
+    { name = "langchain", specifier = "==1.0.8" },
+    { name = "langchain-anthropic", specifier = "==1.1" },
+    { name = "langchain-deepseek", specifier = "==1.0.1" },
+    { name = "langchain-google-genai", specifier = "==3.1" },
+    { name = "langchain-openai", specifier = "==1.0.3" },
     { name = "llm-chat-term", marker = "extra == 'voice'", editable = "." },
-    { name = "prompt-toolkit", specifier = ">=3.0.50" },
-    { name = "pyaudio", marker = "extra == 'voice'", specifier = ">=0.2.14" },
-    { name = "pydub", marker = "extra == 'voice'", specifier = ">=0.25.1" },
-    { name = "python-dotenv", specifier = ">=1.0.1" },
-    { name = "pyyaml", specifier = ">=6.0.2" },
-    { name = "rich", specifier = ">=13.9.4" },
-    { name = "trafilatura", specifier = ">=2" },
+    { name = "prompt-toolkit", specifier = "==3.0.52" },
+    { name = "pyaudio", marker = "extra == 'voice'", specifier = "==0.2.14" },
+    { name = "pydub", marker = "extra == 'voice'", specifier = "==0.25.1" },
+    { name = "python-dotenv", specifier = "==1.2.1" },
+    { name = "pyyaml", specifier = "==6.0.3" },
+    { name = "rich", specifier = "==14.2" },
+    { name = "trafilatura", specifier = "==2" },
 ]
 provides-extras = ["voice"]
 
