@@ -173,7 +173,7 @@ class LLMClient:
             else:
                 text, chunk_type = get_chunk_text_and_type(chunk)
                 stream_callback(text, chunk_type)
-                response += chunk.text()
+                response += text
         if is_tool and tool_message and tool_call_id:
             ai_tool_message = message_chunk_to_message(tool_message)
             # Pause streaming to display the confirm prompt

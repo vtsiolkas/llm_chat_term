@@ -1,3 +1,4 @@
+import logging
 import sys
 
 from langchain_core.messages import SystemMessage
@@ -10,6 +11,8 @@ from llm_chat_term.llm.insert_commands import parse_insert_commands
 from llm_chat_term.llm.llm_client import LLMClient
 from llm_chat_term.llm.models import ModelConfig, get_models
 from llm_chat_term.ui.chat_ui import ChatUI
+
+logger = logging.getLogger(__name__)
 
 
 class LLMChat:
@@ -148,6 +151,7 @@ class LLMChat:
                 )
             except Exception as e:
                 error_msg = f"Something went wrong... {e!s}\n"
+                logger.exception(error_msg)
                 sys.stderr.write(error_msg)
             should_think = False
 
