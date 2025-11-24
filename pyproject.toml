@@ -4,7 +4,7 @@ requires = [ "hatchling" ]
 
 [project]
 name = "llm-chat-term"
-version = "0.2.14"
+version = "0.2.15"
 description = "Chat with LLMs from the terminal"
 readme = "README.md"
 license = { text = "MIT" }
