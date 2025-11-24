@@ -39,6 +39,8 @@ def get_chunk_text_and_type(chunk: BaseMessageChunk) -> tuple[str, str]:
 
     # must be a list, extract the type from the first block
     content: list[dict[str, str] | str] = chunk.content
+    if content == []:
+        return "", "text"
     first_block = content[0]
     if isinstance(first_block, str):
         chunk_type = "text"
